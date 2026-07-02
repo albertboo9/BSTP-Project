@@ -13,6 +13,7 @@ import PrivateLayoutDO from "./components/layout/PrivateLayoutDO";
 import PrivateLayoutAgent from "./components/layout/PrivateLayoutAgent";
 import PrivateLayoutDG from "./components/layout/PrivateLayoutDG";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import { Toaster } from "sonner";
 
 // Lazy loading pages
 const Home = lazy(() => import("./pages/Home/Home"));
@@ -40,6 +41,10 @@ const DashboardParcours = lazy(() => import("./pages/Dashboard/DashboardParcours
 
 // DO Module
 const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/AnnuaireCertifie"));
+
+// DG Module
+const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
+
 const ParcoursDetail = lazy(
   () => import("./pages/Dashboard/ParcoursDetail"),
 );
@@ -142,6 +147,14 @@ function App() {
       {/* ScrollToTop - Réinitialise le scroll au début de chaque page */}
       <ScrollToTop />
 
+      <Toaster 
+        position="top-right" 
+        toastOptions={{
+          style: { borderRadius: '16px', background: '#fff', border: '1px solid #f3f4f6', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' },
+          className: 'font-medium text-sm text-gray-800'
+        }} 
+      />
+
       <Suspense fallback={<LoadingSpinner />}>
         <ParcoursProvider>
           <Routes>
@@ -226,7 +239,7 @@ function App() {
 
           {/* Direction Générale Routes */}
           <Route element={<ProtectedRoute allowedRoles={["dg"]}><PrivateLayoutDG /></ProtectedRoute>}>
-            <Route path="/observatoire" element={<Placeholder title="Cockpit de Pilotage DG" />} />
+            <Route path="/observatoire" element={<DashboardDG />} />
             <Route path="/observatoire/pipeline" element={<Placeholder title="Pipeline Statutaire" />} />
             <Route path="/observatoire/capital-humain" element={<Placeholder title="Capital Humain" />} />
             <Route path="/observatoire/vigilance" element={<Placeholder title="Vigilance Opérationnelle" />} />
