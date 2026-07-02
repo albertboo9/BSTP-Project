@@ -33,11 +33,13 @@ const TestAuth = lazy(() => import("./pages/Auth/TestAuth"));
 const TestLogin = lazy(() => import("./pages/Auth/TestLogin"));
 const TestOrbitalRedesign = lazy(() => import("./pages/TestOrbitalRedesign"));
 // Legacy signup (à supprimer après migration)
-// const Signup = lazy(() => import("./pages/Auth/Signup"));
+// PME Module
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
-const DashboardParcours = lazy(
-  () => import("./pages/Dashboard/DashboardParcours"),
-);
+const PasseportPME = lazy(() => import("./pages/pme/passeport/PasseportPME"));
+const DashboardParcours = lazy(() => import("./pages/Dashboard/DashboardParcours"));
+
+// DO Module
+const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/AnnuaireCertifie"));
 const ParcoursDetail = lazy(
   () => import("./pages/Dashboard/ParcoursDetail"),
 );
@@ -209,7 +211,7 @@ function App() {
           {/* Donneur d'Ordre Routes */}
           <Route element={<ProtectedRoute allowedRoles={["donneur_ordre"]}><PrivateLayoutDO /></ProtectedRoute>}>
             <Route path="/donneur-ordre" element={<Placeholder title="Dashboard Donneur d'Ordre" />} />
-            <Route path="/donneur-ordre/annuaire" element={<Placeholder title="Annuaire Certifié" />} />
+            <Route path="/donneur-ordre/annuaire" element={<AnnuaireCertifie />} />
             <Route path="/donneur-ordre/publier" element={<Placeholder title="Publier un AO" />} />
             <Route path="/donneur-ordre/analytics" element={<Placeholder title="Mes AO / Analytics" />} />
           </Route>
