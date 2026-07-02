@@ -8,11 +8,6 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // For dev: inject a default PME user if no one is logged in
-    // This maintains compatibility with the existing hardcoded mock
-    if (!isAuthenticated) {
-      useAuthStore.getState().setDevUser('pme');
-    }
     setLoading(false);
   }, [isAuthenticated]);
 

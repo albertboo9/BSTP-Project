@@ -175,7 +175,8 @@ function App() {
 
           {/* Public Routes */}
           <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
+            <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/home-legacy" element={<Home />} />
             <Route path="/test-login" element={<TestLogin />} />
             <Route path="/test-orbital" element={<TestOrbitalBubbles />} />
             <Route path="/test-redesign" element={<TestOrbitalRedesign />} />

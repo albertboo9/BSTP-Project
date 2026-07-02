@@ -2,322 +2,191 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet-async";
 import { motion } from "framer-motion";
-import { Mail, Lock, ArrowRight, Sparkles } from "lucide-react";
+import { 
+  Building2, 
+  ShieldCheck, 
+  Activity, 
+  Users, 
+  Sparkles, 
+  ChevronRight,
+  Search,
+  Globe2
+} from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-function TestLogin() {
+export default function TestLogin() {
   const navigate = useNavigate();
   const { login } = useAuth();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [selectedRole, setSelectedRole] = useState(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // For demo purposes: bypass authentication and redirect to dashboard
-    login(email, password);
-    navigate("/dashboard", { replace: true });
+  const roles = [
+    {
+      id: "pme",
+      title: "Espace PME",
+      desc: "Accédez au Passeport Numérique et postulez aux offres",
+      icon: <Building2 size={28} />,
+      color: "text-blue-600",
+      bgHover: "hover:bg-blue-50",
+      borderHover: "hover:border-blue-200",
+      redirect: "/dashboard/passeport"
+    },
+    {
+      id: "donneur_ordre",
+      title: "Donneur d'Ordres",
+      desc: "Consultez l'Annuaire Certifié et publiez vos marchés",
+      icon: <Search size={28} />,
+      color: "text-purple-600",
+      bgHover: "hover:bg-purple-50",
+      borderHover: "hover:border-purple-200",
+      redirect: "/donneur-ordre/annuaire"
+    },
+    {
+      id: "agent_bstp",
+      title: "Agent BSTP",
+      desc: "Gérez la Bannette de Validation et les certifications",
+      icon: <ShieldCheck size={28} />,
+      color: "text-green-600",
+      bgHover: "hover:bg-green-50",
+      borderHover: "hover:border-green-200",
+      redirect: "/agent"
+    },
+    {
+      id: "dg",
+      title: "Direction Générale",
+      desc: "Pilotez avec le Cockpit Stratégique et les KPI",
+      icon: <Activity size={28} />,
+      color: "text-amber-600",
+      bgHover: "hover:bg-amber-50",
+      borderHover: "hover:border-amber-200",
+      redirect: "/observatoire"
+    }
+  ];
+
+  const handleRoleSelect = (roleId, redirectUrl) => {
+    setIsLoggingIn(true);
+    setSelectedRole(roleId);
+    // Simulate network delay for premium feel
+    setTimeout(() => {
+      login(`demo.${roleId}@bstp.cm`, "password", roleId);
+      navigate(redirectUrl, { replace: true });
+    }, 800);
   };
 
   return (
     <>
       <Helmet>
-        <title>Connexion - STARTERKIT CM</title>
+        <title>Portail de Connexion - BSTP NEXUS 2026</title>
       </Helmet>
 
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-        }}
-      >
-        {/* Left Side - Form */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "48px",
-            background: "white",
-          }}
-        >
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            style={{ width: "100%", maxWidth: "420px" }}
-          >
-            {/* Logo */}
-            <div style={{ textAlign: "center", marginBottom: "40px" }}>
-              <Link
-                to="/"
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "10px",
-                  textDecoration: "none",
-                }}
-              >
-                <div
-                  style={{
-                    width: "52px",
-                    height: "52px",
-                    background:
-                      "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                    borderRadius: "14px",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <Sparkles size={28} style={{ color: "white" }} />
-                </div>
-                <span
-                  style={{
-                    fontSize: "24px",
-                    fontWeight: 700,
-                    background:
-                      "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
-                  }}
-                >
-                  STARTERKIT CM
-                </span>
-              </Link>
+      <div className="min-h-screen bg-white flex">
+        
+        {/* Left Side - Brand & Institutional Context */}
+        <div className="hidden lg:flex lg:w-5/12 bg-[#0A1128] relative overflow-hidden flex-col justify-between p-12 text-white">
+          {/* Subtle Background Pattern */}
+          <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(#ffffff 1px, transparent 1px)', backgroundSize: '32px 32px' }}></div>
+          
+          {/* Top Logo */}
+          <div className="relative z-10 flex items-center gap-3">
+            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#635bff] to-[#7c3aed] flex items-center justify-center shadow-lg">
+              <Sparkles className="text-white" size={24} />
             </div>
+            <span className="text-2xl font-black tracking-tight">BSTP NEXUS</span>
+          </div>
 
-            {/* Title */}
-            <div style={{ textAlign: "center", marginBottom: "32px" }}>
-              <h1
-                style={{
-                  fontSize: "28px",
-                  fontWeight: 700,
-                  color: "#1a1a2e",
-                  marginBottom: "8px",
-                }}
-              >
-                Bon retour parmi nous
+          {/* Middle Content */}
+          <div className="relative z-10 max-w-md">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md border border-white/20 mb-6">
+                <Globe2 size={16} className="text-indigo-300" />
+                <span className="text-xs font-bold uppercase tracking-widest text-indigo-100">Plateforme Nationale</span>
+              </div>
+              <h1 className="text-4xl lg:text-5xl font-black leading-tight mb-6">
+                L'excellence de la sous-traitance.
               </h1>
-              <p style={{ fontSize: "15px", color: "#6b7280" }}>
-                Connectez-vous pour accéder à votre espace
+              <p className="text-lg text-indigo-100/80 font-medium leading-relaxed">
+                Connectez-vous pour accéder au portail centralisé. Un écosystème sécurisé, transparent et performant pour les acteurs économiques.
               </p>
+            </motion.div>
+          </div>
+
+          {/* Bottom Footer */}
+          <div className="relative z-10">
+            <p className="text-xs font-medium text-white/40 uppercase tracking-widest">
+              © 2026 Bourse de Sous-Traitance et de Partenariat
+            </p>
+          </div>
+        </div>
+
+        {/* Right Side - Login / Role Switcher */}
+        <div className="flex-1 flex flex-col justify-center p-8 lg:p-16 xl:p-24 bg-gray-50/50">
+          <div className="max-w-xl w-full mx-auto">
+            
+            <motion.div 
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-10 text-center lg:text-left"
+            >
+              <h2 className="text-3xl font-black text-gray-900 tracking-tight mb-3">Accès Environnement de Démonstration</h2>
+              <p className="text-gray-500 font-medium text-lg">
+                Veuillez sélectionner votre profil utilisateur pour continuer vers votre espace de travail.
+              </p>
+            </motion.div>
+
+            <div className="space-y-4">
+              {roles.map((role, idx) => (
+                <motion.button
+                  key={role.id}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * idx }}
+                  onClick={() => handleRoleSelect(role.id, role.redirect)}
+                  disabled={isLoggingIn}
+                  className={`w-full group bg-white border border-gray-200 rounded-2xl p-6 flex items-center gap-6 transition-all duration-300 shadow-sm
+                    ${role.borderHover} ${role.bgHover}
+                    ${selectedRole === role.id ? 'ring-2 ring-indigo-500 border-transparent shadow-md' : 'hover:shadow-md'}
+                    ${isLoggingIn && selectedRole !== role.id ? 'opacity-50 grayscale cursor-not-allowed' : ''}
+                  `}
+                >
+                  <div className={`w-16 h-16 rounded-2xl bg-gray-50 flex items-center justify-center flex-shrink-0 transition-transform duration-300 group-hover:scale-110 ${role.color}`}>
+                    {role.icon}
+                  </div>
+                  
+                  <div className="flex-1 text-left">
+                    <h3 className="text-xl font-bold text-gray-900 mb-1">{role.title}</h3>
+                    <p className="text-gray-500 font-medium text-sm">{role.desc}</p>
+                  </div>
+                  
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center bg-gray-50 text-gray-400 group-hover:bg-white group-hover:text-gray-900 group-hover:shadow-sm transition-all">
+                    {isLoggingIn && selectedRole === role.id ? (
+                      <motion.div 
+                        animate={{ rotate: 360 }} 
+                        transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                        className="w-5 h-5 border-2 border-indigo-500 border-t-transparent rounded-full"
+                      />
+                    ) : (
+                      <ChevronRight size={20} />
+                    )}
+                  </div>
+                </motion.button>
+              ))}
             </div>
 
-            {/* Form */}
-            <form onSubmit={handleSubmit}>
-              <div style={{ marginBottom: "16px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#1a1a2e",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Email
-                </label>
-                <div style={{ position: "relative" }}>
-                  <Mail
-                    size={20}
-                    style={{
-                      position: "absolute",
-                      left: "16px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "#9ca3af",
-                    }}
-                  />
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="vous@exemple.cm"
-                    style={{
-                      width: "100%",
-                      padding: "14px 48px",
-                      border: "2px solid #e5e7eb",
-                      borderRadius: "12px",
-                      fontSize: "15px",
-                      outline: "none",
-                      transition: "border-color 0.2s",
-                    }}
-                  />
-                </div>
+            <div className="mt-12 text-center lg:text-left">
+              <div className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-indigo-50 rounded-lg text-indigo-700 text-sm font-bold">
+                <ShieldCheck size={18} />
+                <span>Prototype Sécurisé • Version d'évaluation 1.0</span>
               </div>
+            </div>
 
-              <div style={{ marginBottom: "16px" }}>
-                <label
-                  style={{
-                    display: "block",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    color: "#1a1a2e",
-                    marginBottom: "8px",
-                  }}
-                >
-                  Mot de passe
-                </label>
-                <div style={{ position: "relative" }}>
-                  <Lock
-                    size={20}
-                    style={{
-                      position: "absolute",
-                      left: "16px",
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      color: "#9ca3af",
-                    }}
-                  />
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    style={{
-                      width: "100%",
-                      padding: "14px 48px",
-                      border: "2px solid #e5e7eb",
-                      borderRadius: "12px",
-                      fontSize: "15px",
-                      outline: "none",
-                      transition: "border-color 0.2s",
-                    }}
-                  />
-                </div>
-              </div>
-
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                type="submit"
-                style={{
-                  width: "100%",
-                  padding: "16px",
-                  background:
-                    "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                  border: "none",
-                  borderRadius: "14px",
-                  color: "white",
-                  fontSize: "15px",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "8px",
-                  boxShadow: "0 4px 15px rgba(99, 91, 255, 0.3)",
-                }}
-              >
-                Me connecter
-                <ArrowRight size={18} />
-              </motion.button>
-            </form>
-
-            {/* Footer */}
-            <p
-              style={{
-                textAlign: "center",
-                marginTop: "24px",
-                fontSize: "14px",
-                color: "#6b7280",
-              }}
-            >
-              Pas encore de compte ?{" "}
-              <Link
-                to="/signup"
-                style={{
-                  color: "#635bff",
-                  fontWeight: 600,
-                  textDecoration: "none",
-                }}
-              >
-                Créer un compte
-              </Link>
-            </p>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Right Side - Inspiring Content */}
-        <div
-          style={{
-            position: "relative",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "linear-gradient(135deg, #1a1a2e 0%, #2d2d4a 100%)",
-            padding: "48px",
-            overflow: "hidden",
-          }}
-        >
-          {/* Decorative elements */}
-          <div
-            style={{
-              position: "absolute",
-              top: "20%",
-              left: "10%",
-              width: "300px",
-              height: "300px",
-              background:
-                "radial-gradient(circle, rgba(99, 91, 255, 0.2) 0%, transparent 70%)",
-              borderRadius: "50%",
-              filter: "blur(60px)",
-            }}
-          />
-          <div
-            style={{
-              position: "absolute",
-              bottom: "10%",
-              right: "5%",
-              width: "400px",
-              height: "400px",
-              background:
-                "radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%)",
-              borderRadius: "50%",
-              filter: "blur(80px)",
-            }}
-          />
-
-          {/* Content */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.8 }}
-            style={{
-              textAlign: "center",
-              maxWidth: "450px",
-              position: "relative",
-              zIndex: 1,
-            }}
-          >
-            <h2
-              style={{
-                fontSize: "32px",
-                fontWeight: 700,
-                color: "white",
-                marginBottom: "16px",
-                lineHeight: 1.2,
-              }}
-            >
-              Votre prochaine grande aventure commence ici
-            </h2>
-            <p
-              style={{
-                fontSize: "16px",
-                color: "rgba(255, 255, 255, 0.7)",
-                marginBottom: "40px",
-                lineHeight: 1.6,
-              }}
-            >
-              Rejoignez des milliers d'entrepreneurs camerounais qui
-              transforment leurs idées en entreprises prospères.
-            </p>
-          </motion.div>
-        </div>
       </div>
     </>
   );
 }
-
-export default TestLogin;
