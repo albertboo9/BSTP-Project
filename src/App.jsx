@@ -197,17 +197,13 @@ function App() {
           {/* PME Routes */}
           <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/dashboard/parcours" element={<DashboardParcours />} />
-            <Route path="/dashboard/parcours/:id" element={<ParcoursDetail />} />
-            <Route path="/dashboard/formations" element={<DashboardFormations />} />
+            <Route path="/dashboard/passeport" element={<PasseportPME />} />
+            <Route path="/dashboard/opportunites" element={<Placeholder title="Appels d'Offres" />} />
+            <Route path="/dashboard/suivi-contrat" element={<Placeholder title="Mes Contrats" />} />
+            <Route path="/dashboard/academy" element={<Placeholder title="BSTP Academy" />} />
+            {/* Legacy PME routes if needed temporarily */}
             <Route path="/dashboard/profile" element={<DashboardProfile />} />
-            <Route path="/dashboard/documents" element={<DashboardDocuments />} />
             <Route path="/dashboard/messages" element={<DashboardMessages />} />
-            <Route path="/dashboard/projects" element={<DashboardProjects />} />
-            <Route path="/dashboard/suivi-contrat" element={<Placeholder title="Suivi Contrats" />} />
-            <Route path="/dashboard/certification" element={<Certification />} />
-            <Route path="/certification" element={<Certification />} />
-            <Route path="/upload" element={<Upload />} />
           </Route>
 
           {/* Donneur d'Ordre Routes */}

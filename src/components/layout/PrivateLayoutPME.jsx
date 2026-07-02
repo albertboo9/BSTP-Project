@@ -1,17 +1,13 @@
 import React from 'react';
 import SharedPrivateLayout from './SharedPrivateLayout';
-import { LayoutDashboard, Route, BookOpen, Award, FileText, User, Bell, Briefcase } from "lucide-react";
+import { LayoutDashboard, FileCheck, ShieldCheck, GraduationCap, Briefcase } from "lucide-react";
 
 const pmeMenuItems = [
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/dashboard/parcours", label: "Mes parcours", icon: Route },
-  { path: "/dashboard/formations", label: "Mes formations", icon: BookOpen },
-  { path: "/dashboard/certification", label: "Mes certifications", icon: Award },
-  { path: "/dashboard/documents", label: "Documents", icon: FileText },
-  { path: "/dashboard/profile", label: "Mon profil", icon: User },
-  { path: "/dashboard/messages", label: "Messages", icon: Bell },
-  { path: "/dashboard/projects", label: "Projets", icon: Briefcase },
-  { path: "/dashboard/suivi-contrat", label: "Suivi Contrats", icon: Briefcase },
+  { path: "/dashboard", label: "Cockpit PME", icon: LayoutDashboard },
+  { path: "/dashboard/passeport", label: "Passeport Numérique", icon: ShieldCheck },
+  { path: "/dashboard/opportunites", label: "Appels d'Offres", icon: Briefcase },
+  { path: "/dashboard/suivi-contrat", label: "Mes Contrats", icon: FileCheck },
+  { path: "/dashboard/academy", label: "BSTP Academy", icon: GraduationCap },
 ];
 
 export default function PrivateLayoutPME() {
