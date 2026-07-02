@@ -2,8 +2,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { motion } from "framer-motion";
 
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function ProtectedRoute({ children, allowedRoles }) {
+  const { user, isAuthenticated, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -36,7 +36,18 @@ function ProtectedRoute({ children }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    switch (user?.role) {
+      case 'pme': return <Navigate to="/dashboard" replace />;
+      case 'donneur_ordre': return <Navigate to="/donneur-ordre" replace />;
+      case 'agent_bstp': return <Navigate to="/agent" replace />;
+      case 'dg': return <Navigate to="/observatoire" replace />;
+      default: return <Navigate to="/" replace />;
+    }
+  }
+
   return children;
 }
 
 export default ProtectedRoute;
+

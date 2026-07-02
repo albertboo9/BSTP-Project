@@ -8,7 +8,10 @@ import { ParcoursProvider } from "./context/ParcoursContext";
 // Layouts
 import PublicLayout from "./components/layout/PublicLayout";
 import AuthLayout from "./components/layout/AuthLayout";
-import PrivateLayout from "./components/layout/PrivateLayout";
+import PrivateLayoutPME from "./components/layout/PrivateLayoutPME";
+import PrivateLayoutDO from "./components/layout/PrivateLayoutDO";
+import PrivateLayoutAgent from "./components/layout/PrivateLayoutAgent";
+import PrivateLayoutDG from "./components/layout/PrivateLayoutDG";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 // Lazy loading pages
@@ -76,6 +79,14 @@ const EntrepreneurProjects = lazy(
 );
 const StarterCommunity = lazy(
   () => import("./pages/ressources/StarterCommunity"),
+);
+
+// Placeholders for new pages
+const Placeholder = ({ title }) => (
+  <div style={{ padding: '40px', textAlign: 'center' }}>
+    <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{title}</h2>
+    <p style={{ color: '#6b7280' }}>Ce module est en cours de construction (Phase de refactoring BSTP NEXUS 2026).</p>
+  </div>
 );
 
 // Loading component
@@ -183,37 +194,44 @@ function App() {
             />
           </Route>
 
-          {/* Private Routes */}
-          <Route
-            element={
-              <ProtectedRoute>
-                <PrivateLayout />
-              </ProtectedRoute>
-            }
-          >
+          {/* PME Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/parcours" element={<DashboardParcours />} />
             <Route path="/dashboard/parcours/:id" element={<ParcoursDetail />} />
-            <Route
-              path="/dashboard/formations"
-              element={<DashboardFormations />}
-            />
+            <Route path="/dashboard/formations" element={<DashboardFormations />} />
             <Route path="/dashboard/profile" element={<DashboardProfile />} />
-            <Route
-              path="/dashboard/documents"
-              element={<DashboardDocuments />}
-            />
+            <Route path="/dashboard/documents" element={<DashboardDocuments />} />
             <Route path="/dashboard/messages" element={<DashboardMessages />} />
-            <Route
-              path="/dashboard/projects"
-              element={<DashboardProjects />}
-            />
-            <Route
-              path="/dashboard/certification"
-              element={<Certification />}
-            />
+            <Route path="/dashboard/projects" element={<DashboardProjects />} />
+            <Route path="/dashboard/suivi-contrat" element={<Placeholder title="Suivi Contrats" />} />
+            <Route path="/dashboard/certification" element={<Certification />} />
             <Route path="/certification" element={<Certification />} />
             <Route path="/upload" element={<Upload />} />
+          </Route>
+
+          {/* Donneur d'Ordre Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["donneur_ordre"]}><PrivateLayoutDO /></ProtectedRoute>}>
+            <Route path="/donneur-ordre" element={<Placeholder title="Dashboard Donneur d'Ordre" />} />
+            <Route path="/donneur-ordre/annuaire" element={<Placeholder title="Annuaire Certifié" />} />
+            <Route path="/donneur-ordre/publier" element={<Placeholder title="Publier un AO" />} />
+            <Route path="/donneur-ordre/analytics" element={<Placeholder title="Mes AO / Analytics" />} />
+          </Route>
+
+          {/* Agent BSTP Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
+            <Route path="/agent" element={<Placeholder title="Dashboard Agent BSTP" />} />
+            <Route path="/agent/audits" element={<Placeholder title="Audit Documentaire" />} />
+            <Route path="/agent/terrain" element={<Placeholder title="Planification Terrain" />} />
+            <Route path="/agent/mediation" element={<Placeholder title="Médiation Tripartite" />} />
+          </Route>
+
+          {/* Direction Générale Routes */}
+          <Route element={<ProtectedRoute allowedRoles={["dg"]}><PrivateLayoutDG /></ProtectedRoute>}>
+            <Route path="/observatoire" element={<Placeholder title="Cockpit de Pilotage DG" />} />
+            <Route path="/observatoire/pipeline" element={<Placeholder title="Pipeline Statutaire" />} />
+            <Route path="/observatoire/capital-humain" element={<Placeholder title="Capital Humain" />} />
+            <Route path="/observatoire/vigilance" element={<Placeholder title="Vigilance Opérationnelle" />} />
           </Route>
 
           {/* Catch all */}
