@@ -45,6 +45,9 @@ const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/Annua
 // DG Module
 const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
 
+// Agent Module
+const DashboardAgent = lazy(() => import("./pages/agent/DashboardAgent"));
+
 const ParcoursDetail = lazy(
   () => import("./pages/Dashboard/ParcoursDetail"),
 );
@@ -231,7 +234,7 @@ function App() {
 
           {/* Agent BSTP Routes */}
           <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
-            <Route path="/agent" element={<Placeholder title="Dashboard Agent BSTP" />} />
+            <Route path="/agent" element={<DashboardAgent />} />
             <Route path="/agent/audits" element={<Placeholder title="Audit Documentaire" />} />
             <Route path="/agent/terrain" element={<Placeholder title="Planification Terrain" />} />
             <Route path="/agent/mediation" element={<Placeholder title="Médiation Tripartite" />} />
