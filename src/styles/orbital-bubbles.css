@@ -1,0 +1,526 @@
+
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Great+Vibes&family=Inter:wght@400;500;600;700;800&display=swap");
+/* ========================================
+   ORBITAL BUBBLES - 200% Fidelity "Crystal State"
+   ======================================== */
+
+:root {
+  /* Institutional Palette - Exact Match */
+  --color-pearl: #fcfcfc;
+  --color-emerald-deep: #0a3d32;
+  /* Darker, more official */
+  --color-emerald-light: #2d5a4c;
+  --color-gold-prestige: #a67c00;
+  /* Metallic Gold */
+  --color-text-main: #1a1c1e;
+  --color-text-sub: #4b5563;
+  --color-cam-green: #007a5e;
+  --color-cam-red: #ce1126;
+  --color-cam-yellow: #fcd116;
+
+  /* Glassmorphism Presets - High Definition */
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.6) 0%, rgba(255, 255, 255, 0.2) 100%);
+  --glass-border: rgba(255, 255, 255, 0.8);
+  --glass-highlight: rgba(255, 255, 255, 0.9);
+  --glass-shadow: 0 10px 40px -10px rgba(0, 60, 40, 0.15);
+
+  /* Font Families */
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', sans-serif;
+
+  /* Layout Constants */
+  --nav-height: 90px;
+}
+
+/* ========================================
+   CONTAINER & BACKGROUND
+   ======================================== */
+
+/* ========================================
+   CONTAINER & BACKGROUND
+   ======================================== */
+
+.orbital-bubbles-wrapper {
+  position: relative;
+  width: 100%;
+  min-height: 85vh;
+  /* Reduced from 100vh for a more compact feel */
+  /* Background is now handled by the video element */
+  background-color: var(--color-pearl);
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--color-text-main);
+}
+
+.orbital-bg-video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
+/* Optional overlay to ensure text readability over video */
+.orbital-bg-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(252, 252, 252, 0.4);
+  /* Slight pearl tint */
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Noise Texture for Paper Feel - Keep this for premium finish */
+.orbital-bubbles-wrapper::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  z-index: 2;
+  /* Above video and overlay */
+  pointer-events: none;
+}
+
+
+/* ========================================
+   TOP NAVIGATION
+   ======================================== */
+
+.orbital-navbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 6%;
+  z-index: 100;
+  /* No visual border or background initially to match fluid top */
+}
+
+.orbital-logo-group {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.orbital-logo-img {
+  height: 56px;
+  /* Larger */
+  width: auto;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.orbital-logo-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.orbital-logo-title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--color-emerald-deep);
+  letter-spacing: -0.5px;
+  line-height: 1;
+}
+
+.orbital-logo-sub {
+  font-family: var(--font-serif);
+  font-size: 11px;
+  color: var(--color-text-sub);
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.orbital-nav-links {
+  display: flex;
+  gap: 40px;
+  align-items: center;
+}
+
+.orbital-nav-link {
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 500;
+  color: #555;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s;
+}
+
+.orbital-nav-link:hover {
+  color: var(--color-emerald-deep);
+}
+
+.orbital-nav-cta {
+  padding: 12px 28px;
+  background: var(--color-emerald-deep);
+  color: white;
+  border-radius: 50px;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(10, 61, 50, 0.3);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.orbital-nav-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(10, 61, 50, 0.4);
+}
+
+/* ========================================
+   HERO CONTENT (LEFT)
+   ======================================== */
+
+.hero-main-container {
+  position: relative;
+  width: 100%;
+  max-width: 1600px;
+  /* Wide screen support */
+  margin: 0 auto;
+  min-height: 65vh;
+  /* Significantly reduced from 85vh */
+  /* Occupy mostly full screen */
+  padding: calc(var(--nav-height) + 20px) 6% 0;
+  /* Reduced top padding */
+  display: grid;
+  grid-template-columns: 45% 55%;
+  /* More space for Orbital */
+  z-index: 10;
+}
+
+.hero-text-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+  /* Tighter gap */
+  padding-bottom: 40px;
+  /* Reduced bottom padding */
+  /* offset center */
+}
+
+/* Typography Overhaul */
+.hero-text-content h1 {
+  font-family: var(--font-serif);
+  font-size: clamp(40px, 3vw, 60px);
+  /* Slightly smaller max size for elegance */
+  line-height: 1.1;
+  color: var(--color-emerald-deep);
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.hero-text-content h1 span.gold-accent {
+  color: var(--color-gold-prestige);
+  font-style: italic;
+  /* Playfair Italic is beautiful */
+  background: -webkit-linear-gradient(45deg, #B8860B, #D4AF37);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-text-content p {
+  font-family: var(--font-sans);
+  font-size: 18px;
+  line-height: 1.7;
+  color: #555;
+  max-width: 520px;
+  font-weight: 400;
+}
+
+.hero-cta-group {
+  display: flex;
+  gap: 20px;
+  margin-top: 10px;
+}
+
+.btn-premium-solid {
+  padding: 18px 36px;
+  background: var(--color-emerald-deep);
+  color: white;
+  border-radius: 50px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  box-shadow: 0 10px 30px rgba(10, 61, 50, 0.3);
+  transition: all 0.3s;
+}
+
+.btn-premium-solid:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 15px 40px rgba(10, 61, 50, 0.4);
+}
+
+.btn-premium-glass {
+  padding: 18px 36px;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  color: var(--color-emerald-deep);
+  border-radius: 50px;
+  font-weight: 600;
+  border: 1px solid rgba(27, 77, 62, 0.1);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: all 0.3s;
+}
+
+.btn-premium-glass:hover {
+  background: white;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+/* ========================================
+   ORBITAL STAGE (RIGHT)
+   ======================================== */
+
+.orbital-stage {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  /* We will use absolute positioning mostly, but flex center for anchor */
+  align-items: center;
+  justify-content: center;
+  perspective: 1000px;
+}
+
+/* The Orbit Trace Lines */
+.orbit-trace {
+  position: absolute;
+  border: 1px solid rgba(184, 134, 11, 0.2);
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+
+/* ========================================
+   GLASS CAPSULES - HIGH FIDELITY
+   ======================================== */
+
+.glass-capsule {
+  position: absolute;
+  width: auto;
+  min-width: 220px;
+  height: 80px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-border);
+  border-radius: 100px;
+  display: flex;
+  align-items: center;
+  padding: 8px 10px 8px 8px;
+  /* Tight padding left for the circle */
+  box-shadow: var(--glass-shadow);
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  z-index: 10;
+}
+
+/* Inner highlight reflection for 3D feel */
+.glass-capsule::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  left: 15px;
+  right: 15px;
+  height: 40%;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+  border-radius: 100px;
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+.glass-capsule:hover {
+  transform: scale(1.08) translateY(-5px);
+  background: rgba(255, 255, 255, 0.85);
+  /* Whiter on hover */
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.1);
+  z-index: 100 !important;
+}
+
+/* The Circle Icon Container */
+.capsule-icon-box {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, #ffffff, #f0f0f0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+  /* Soft shadow */
+  position: relative;
+  z-index: 2;
+  border: 2px solid white;
+}
+
+/* Cameroonian Flag Stripe on specific icons if needed, implies national identity */
+.capsule-icon-box.flag-accent::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(90deg, var(--color-cam-green) 33%, var(--color-cam-red) 33%, var(--color-cam-red) 66%, var(--color-cam-yellow) 66%);
+  border-radius: 0 0 50% 50%;
+  opacity: 0.8;
+}
+
+.capsule-text {
+  flex: 1;
+  padding-left: 16px;
+  padding-right: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.capsule-title {
+  font-family: var(--font-sans);
+  /** Keep Sans for UI elements for readability */
+  font-weight: 700;
+  color: var(--color-emerald-deep);
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.capsule-sub {
+  font-size: 12px;
+  color: #666;
+  margin-top: 2px;
+}
+
+/* ========================================
+   BOTTOM INTENTS WITH GUIDES
+   ======================================== */
+
+.bottom-intents-section {
+  position: relative;
+  width: 100%;
+  max-width: 1280px;
+  margin: -80px auto 0;
+  /* Increased negative margin to pull up closer */
+  /* Neg margin to pull up over hero */
+  padding: 0 6% 60px;
+  z-index: 20;
+}
+
+.bottom-section-title {
+  margin-bottom: 30px;
+}
+
+.bottom-section-title h2 {
+  font-family: var(--font-serif);
+  font-size: 28px;
+  color: var(--color-text-main);
+  line-height: 1.3;
+}
+
+.bottom-section-title h2 span.bold {
+  font-weight: 700;
+  color: var(--color-emerald-deep);
+}
+
+.intents-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.intent-card {
+  position: relative;
+  background: rgba(255, 255, 255, 0.4);
+  /* More transparent */
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  align-items: flex-start;
+  /* Align top for better layout */
+  gap: 20px;
+  transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  overflow: hidden;
+  margin-top: 30px !important;
+}
+
+/* Fancy hover glow for cards */
+.intent-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent);
+  opacity: 0;
+  transition: opacity 0.4s;
+}
+
+.intent-card:hover {
+  background: rgba(255, 255, 255, 0.7);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+  /* Soft diffuse shadow */
+  border-color: white;
+}
+
+.intent-card:hover::before {
+  opacity: 1;
+}
+
+.intent-text {
+  position: relative;
+  z-index: 2;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .hero-main-container {
+    grid-template-columns: 1fr;
+    text-align: center;
+    padding-top: 120px;
+    min-height: auto;
+  }
+
+  .hero-text-content {
+    align-items: center;
+    padding-bottom: 40px;
+  }
+
+  .hero-cta-group {
+    justify-content: center;
+  }
+
+  /* On mobile, orbital stage becomes a static list or smaller */
+  .orbital-stage {
+    height: 500px;
+  }
+
+  .intents-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .bottom-intents-section {
+    margin-top: 20px;
+  }
+}
