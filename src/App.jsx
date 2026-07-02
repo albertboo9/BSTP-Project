@@ -36,8 +36,12 @@ const TestOrbitalRedesign = lazy(() => import("./pages/TestOrbitalRedesign"));
 // Legacy signup (à supprimer après migration)
 // PME Module
 const DashboardPME = lazy(() => import("./pages/pme/DashboardPME"));
+const OnboardingPME = lazy(() => import("./pages/pme/OnboardingPME"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const PasseportPME = lazy(() => import("./pages/pme/passeport/PasseportPME"));
+const OpportunitiesPage = lazy(() => import("./pages/pme/OpportunitiesPage"));
+const SuiviContratsPage = lazy(() => import("./pages/pme/SuiviContratsPage"));
+const AcademyPage = lazy(() => import("./pages/pme/AcademyPage"));
 const DashboardParcours = lazy(() => import("./pages/Dashboard/DashboardParcours"));
 
 // DO Module
@@ -48,6 +52,9 @@ const SourcingAnalytics = lazy(() => import("./pages/donneur-ordre/SourcingAnaly
 
 // DG Module
 const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
+const PipelinePage = lazy(() => import("./pages/dg/PipelinePage"));
+const CapitalHumainPage = lazy(() => import("./pages/dg/CapitalHumainPage"));
+const VigilancePage = lazy(() => import("./pages/dg/VigilancePage"));
 
 // Agent Module
 const DashboardAgent = lazy(() => import("./pages/agent/DashboardAgent"));
@@ -220,10 +227,11 @@ function App() {
           {/* PME Routes */}
           <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
             <Route path="/dashboard" element={<DashboardPME />} />
+            <Route path="/dashboard/onboarding" element={<OnboardingPME />} />
             <Route path="/dashboard/passeport" element={<PasseportPME />} />
-            <Route path="/dashboard/opportunites" element={<Placeholder title="Appels d'Offres" />} />
-            <Route path="/dashboard/suivi-contrat" element={<Placeholder title="Mes Contrats" />} />
-            <Route path="/dashboard/academy" element={<Placeholder title="BSTP Academy" />} />
+            <Route path="/dashboard/opportunites" element={<OpportunitiesPage />} />
+            <Route path="/dashboard/suivi-contrat" element={<SuiviContratsPage />} />
+            <Route path="/dashboard/academy" element={<AcademyPage />} />
             {/* Legacy PME routes if needed temporarily */}
             <Route path="/dashboard/profile" element={<DashboardProfile />} />
             <Route path="/dashboard/messages" element={<DashboardMessages />} />
@@ -240,17 +248,17 @@ function App() {
           {/* Agent BSTP Routes */}
           <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
             <Route path="/agent" element={<DashboardAgent />} />
-            <Route path="/agent/audits" element={<Placeholder title="Audit Documentaire" />} />
-            <Route path="/agent/terrain" element={<Placeholder title="Planification Terrain" />} />
-            <Route path="/agent/mediation" element={<Placeholder title="Médiation Tripartite" />} />
+            <Route path="/agent/audits" element={<Navigate to="/agent?tab=audit" replace />} />
+            <Route path="/agent/terrain" element={<Navigate to="/agent?tab=terrain" replace />} />
+            <Route path="/agent/mediation" element={<Navigate to="/agent?tab=mediation" replace />} />
           </Route>
 
           {/* Direction Générale Routes */}
           <Route element={<ProtectedRoute allowedRoles={["dg"]}><PrivateLayoutDG /></ProtectedRoute>}>
             <Route path="/observatoire" element={<DashboardDG />} />
-            <Route path="/observatoire/pipeline" element={<Placeholder title="Pipeline Statutaire" />} />
-            <Route path="/observatoire/capital-humain" element={<Placeholder title="Capital Humain" />} />
-            <Route path="/observatoire/vigilance" element={<Placeholder title="Vigilance Opérationnelle" />} />
+            <Route path="/observatoire/pipeline" element={<PipelinePage />} />
+            <Route path="/observatoire/capital-humain" element={<CapitalHumainPage />} />
+            <Route path="/observatoire/vigilance" element={<VigilancePage />} />
           </Route>
 
           {/* Catch all */}

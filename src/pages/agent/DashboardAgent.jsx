@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { auditQueue, planningTerrain, mediationDossiers } from '../../data/agent-tasks.mock';
@@ -16,7 +17,9 @@ const TABS = [
 const formatCFA = (n) => new Intl.NumberFormat('fr-FR').format(n) + ' FCFA';
 
 export default function DashboardAgent() {
-  const [activeTab, setActiveTab] = useState('audit');
+  const [searchParams, setSearchParams] = useSearchParams();
+  const activeTab = searchParams.get('tab') || 'audit';
+  const setActiveTab = (tab) => setSearchParams({ tab });
   const [queue, setQueue] = useState(auditQueue);
 
   const pendingCount = queue.length;

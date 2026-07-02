@@ -2,870 +2,379 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate, Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import { useAuthStore } from "../../stores/authStore";
 import Assistant from "../assistant/Assistant";
+import TrustBadge from "../ui/TrustBadge";
 import {
   LayoutDashboard,
-  Route,
-  BookOpen,
-  Award,
-  FileText,
-  User,
+  ShieldCheck,
+  GraduationCap,
+  Briefcase,
+  FileCheck,
+  Search,
   Bell,
   LogOut,
   ChevronRight,
-  Briefcase,
+  Menu,
+  X,
+  User,
+  RefreshCw,
+  FolderLock
 } from "lucide-react";
-import TrustBadge from "../ui/TrustBadge";
 
-function SharedPrivateLayout({ menuItems = [], userRoleLabel = "Utilisateur" }) {
+const ROLES = [
+  { id: "pme", label: "Cockpit PME", color: "from-blue-500 to-indigo-600", path: "/dashboard" },
+  { id: "donneur_ordre", label: "Donneur d'Ordre", color: "from-purple-500 to-pink-600", path: "/donneur-ordre" },
+  { id: "agent_bstp", label: "Agent BSTP", color: "from-amber-500 to-orange-600", path: "/agent" },
+  { id: "dg", label: "Direction Générale", color: "from-emerald-500 to-teal-600", path: "/observatoire" }
+];
+
+export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "Utilisateur" }) {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { setDevUser } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate("/login");
+  };
+
+  const handleRoleSwitch = (roleId, path) => {
+    setDevUser(roleId);
+    setRoleSwitcherOpen(false);
+    navigate(path);
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: "#f8f9fa" }}>
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMobileMenuOpen(false)}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                background: "rgba(0, 0, 0, 0.5)",
-                zIndex: 99,
-              }}
-              className="mobile-overlay"
-            />
-
-            {/* Mobile Sidebar Drawer */}
-            <motion.div
-              initial={{ x: "-100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              style={{
-                position: "fixed",
-                top: 0,
-                left: 0,
-                bottom: 0,
-                width: "280px",
-                background: "#1a1a2e",
-                zIndex: 100,
-                display: "flex",
-                flexDirection: "column",
-              }}
-              className="mobile-sidebar"
-            >
-              {/* Logo */}
-              <div
-                style={{
-                  height: "72px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "0 20px",
-                  borderBottom: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "12px" }}
-                >
-                  <div
-                    style={{
-                      width: "40px",
-                      height: "40px",
-                      borderRadius: "10px",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      overflow: "hidden",
-                      background: "white",
-                      flexShrink: 0,
-                    }}
-                  >
-                    <img
-                      src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
-                      alt="MINPMEESA"
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "contain",
-                      }}
-                    />
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      color: "white",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
-                    STARTERKITCM
-                  </span>
-                </div>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{
-                    background: "transparent",
-                    border: "none",
-                    color: "rgba(255,255,255,0.7)",
-                    cursor: "pointer",
-                    padding: "8px",
-                  }}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Nav */}
-              <nav style={{ flex: 1, padding: "20px 12px" }}>
-                {menuItems.map((item) => {
-                  const isActive = location.pathname === item.path;
-                  return (
-                    <Link
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        padding: "14px 16px",
-                        borderRadius: "12px",
-                        marginBottom: "4px",
-                        textDecoration: "none",
-                        background: isActive
-                          ? "rgba(99, 91, 255, 0.2)"
-                          : "transparent",
-                        color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
-                        transition: "all 0.2s",
-                        fontSize: "15px",
-                        fontWeight: 500,
-                      }}
-                    >
-                      <svg
-                        width="22"
-                        height="22"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d={item.icon} />
-                      </svg>
-                      <span style={{ marginLeft: "14px" }}>{item.label}</span>
-                    </Link>
-                  );
-                })}
-              </nav>
-
-              {/* User */}
-              <div
-                style={{
-                  padding: "20px 12px",
-                  borderTop: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "12px 16px",
-                    borderRadius: "12px",
-                    background: "rgba(255,255,255,0.05)",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "44px",
-                      height: "44px",
-                      borderRadius: "12px",
-                      background:
-                        "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      fontSize: "18px",
-                      fontWeight: 700,
-                      flexShrink: 0,
-                    }}
-                  >
-                    {user?.firstName?.[0] || "U"}
-                  </div>
-                  <div style={{ marginLeft: "12px", flex: 1, minWidth: 0 }}>
-                    <p
-                      style={{
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: 600,
-                        margin: 0,
-                      }}
-                    >
-                      {user?.firstName || "Utilisateur"} {user?.lastName || ""}
-                    </p>
-                    <p
-                      style={{
-                        color: "rgba(255,255,255,0.5)",
-                        fontSize: "12px",
-                        margin: 0,
-                      }}
-                    >
-                      {userRoleLabel}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  style={{
-                    width: "100%",
-                    marginTop: "12px",
-                    padding: "14px",
-                    background: "rgba(233, 69, 96, 0.1)",
-                    border: "1px solid rgba(233, 69, 96, 0.3)",
-                    borderRadius: "12px",
-                    color: "#e94560",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-                  </svg>
-                  Deconnexion
-                </button>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+    <div className="flex min-h-screen bg-gray-900 text-gray-100 font-sans overflow-x-hidden">
+      {/* Dynamic Grid Background for Futuristic Vibe */}
+      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-25 pointer-events-none z-0" />
 
       {/* Desktop Sidebar */}
       <aside
-        style={{
-          width: sidebarOpen ? "260px" : "72px",
-          background: "#1a1a2e",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
-          zIndex: 100,
-          transition: "width 0.3s ease",
-          display: "flex",
-          flexDirection: "column",
-        }}
-        className="desktop-sidebar"
+        className={`fixed top-0 left-0 bottom-0 z-40 bg-gray-950 border-r border-gray-800 transition-all duration-300 flex flex-col ${
+          sidebarOpen ? "w-64" : "w-20"
+        } hidden md:flex`}
       >
-        {/* Logo */}
-        <div
-          style={{
-            height: "72px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: sidebarOpen ? "flex-start" : "center",
-            padding: sidebarOpen ? "0 20px" : "0",
-            borderBottom: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          <div
-            style={{
-              width: "40px",
-              height: "40px",
-              borderRadius: "10px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              overflow: "hidden",
-              background: "white",
-              flexShrink: 0,
-            }}
-          >
-            <img
-              src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
-              alt="MINPMEESA"
-              style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-              }}
-            />
+        {/* Sidebar Header */}
+        <div className="h-20 flex items-center justify-between px-6 border-b border-gray-800/80">
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-white/5">
+              <img
+                src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
+                alt="BSTPKIT"
+                className="w-8 h-8 object-contain"
+              />
+            </div>
+            {sidebarOpen && (
+              <div className="flex flex-col">
+                <span className="font-black text-sm tracking-tight text-white uppercase">BSTPKIT CM</span>
+                <span className="text-[10px] text-nexus-500 font-bold uppercase tracking-widest">Nexus 2026</span>
+              </div>
+            )}
           </div>
-          {sidebarOpen && (
-            <span
-              style={{
-                fontSize: "18px",
-                fontWeight: 700,
-                color: "white",
-                marginLeft: "12px",
-                whiteSpace: "nowrap",
-              }}
-            >
-              STARTERKITCM
-            </span>
-          )}
         </div>
 
-        {/* Nav */}
-        <nav style={{ flex: 1, padding: "20px 12px" }}>
+        {/* Sidebar Navigation */}
+        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
+            const Icon = item.icon;
             return (
               <Link
                 key={item.path}
                 to={item.path}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  padding: "12px 16px",
-                  borderRadius: "10px",
-                  marginBottom: "4px",
-                  textDecoration: "none",
-                  background: isActive
-                    ? "rgba(99, 91, 255, 0.2)"
-                    : "transparent",
-                  color: isActive ? "#fff" : "rgba(255,255,255,0.7)",
-                  transition: "all 0.2s",
-                }}
+                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group relative ${
+                  isActive
+                    ? "bg-nexus-500 text-white font-semibold shadow-lg shadow-nexus-500/10"
+                    : "text-gray-400 hover:text-white hover:bg-gray-900"
+                }`}
               >
-                <item.icon size={20} style={{ flexShrink: 0 }} />
-                {sidebarOpen && (
-                  <span
-                    style={{
-                      marginLeft: "12px",
-                      fontSize: "14px",
-                      fontWeight: 500,
-                    }}
-                  >
-                    {item.label}
-                  </span>
+                <Icon size={20} className={`${isActive ? "text-white" : "text-gray-400 group-hover:text-nexus-400"}`} />
+                {sidebarOpen && <span className="text-sm truncate">{item.label}</span>}
+                {isActive && (
+                  <motion.div
+                    layoutId="activeIndicator"
+                    className="absolute left-0 top-2 bottom-2 w-1.5 bg-white rounded-r"
+                    transition={{ type: "spring", stiffness: 380, damping: 30 }}
+                  />
                 )}
               </Link>
             );
           })}
         </nav>
 
-        {/* User */}
-        <div
-          style={{
-            padding: "20px 12px",
-            borderTop: "1px solid rgba(255,255,255,0.08)",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              padding: "12px 16px",
-              borderRadius: "10px",
-              background: "rgba(255,255,255,0.05)",
-            }}
-          >
-            <div
-              style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "10px",
-                background: "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: "16px",
-                fontWeight: 700,
-                flexShrink: 0,
-              }}
+        {/* Role Switcher & User Panel */}
+        <div className="p-4 border-t border-gray-800 bg-gray-950/80 backdrop-blur">
+          {/* Active Switcher Option */}
+          <div className="relative">
+            <button
+              onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-800 transition-all text-left"
             >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-8 h-8 rounded-lg bg-nexus-500/10 text-nexus-400 flex items-center justify-center flex-shrink-0">
+                  <RefreshCw size={16} />
+                </div>
+                {sidebarOpen && (
+                  <div className="min-w-0">
+                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Acteur Actuel</p>
+                    <p className="text-xs font-bold text-white truncate">{userRoleLabel}</p>
+                  </div>
+                )}
+              </div>
+              {sidebarOpen && <ChevronRight size={14} className={`text-gray-500 transition-transform ${roleSwitcherOpen ? "rotate-90" : ""}`} />}
+            </button>
+
+            {/* Dropdown Role Switcher */}
+            <AnimatePresence>
+              {roleSwitcherOpen && sidebarOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute bottom-full left-0 right-0 mb-2 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 p-1.5 space-y-1"
+                >
+                  <p className="text-[9px] text-gray-500 font-bold uppercase px-3 py-1 tracking-widest">Changer d'acteur (Démo)</p>
+                  {ROLES.map((role) => (
+                    <button
+                      key={role.id}
+                      onClick={() => handleRoleSwitch(role.id, role.path)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-xs font-semibold transition-colors ${
+                        user?.role === role.id ? "bg-nexus-500/10 text-nexus-400" : "text-gray-400 hover:text-white hover:bg-gray-900"
+                      }`}
+                    >
+                      <div className={`w-2 h-2 rounded-full bg-gradient-to-tr ${role.color}`} />
+                      <span>{role.label}</span>
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* User info & Logout */}
+          <div className="mt-4 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center font-bold text-sm text-nexus-400">
               {user?.firstName?.[0] || "U"}
             </div>
             {sidebarOpen && (
-              <div style={{ marginLeft: "12px", flex: 1, minWidth: 0 }}>
-                <p
-                  style={{
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: 600,
-                    margin: 0,
-                  }}
-                >
-                  {user?.firstName || "Utilisateur"} {user?.lastName || ""}
-                </p>
-                <p
-                  style={{
-                    color: "rgba(255,255,255,0.5)",
-                    fontSize: "12px",
-                    margin: 0,
-                  }}
-                >
-                  {userRoleLabel}
-                </p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-bold text-white truncate">{user?.firstName || "Utilisateur"}</p>
+                <p className="text-[10px] text-gray-500 truncate">Connecté</p>
               </div>
             )}
             {sidebarOpen && (
               <button
                 onClick={handleLogout}
-                style={{
-                  background: "transparent",
-                  border: "none",
-                  color: "rgba(255,255,255,0.5)",
-                  cursor: "pointer",
-                  padding: "8px",
-                }}
+                className="p-2 text-gray-500 hover:text-danger-400 transition-colors"
+                title="Déconnexion"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9" />
-                </svg>
+                <LogOut size={16} />
               </button>
             )}
           </div>
         </div>
-
-        {/* Toggle */}
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          style={{
-            position: "absolute",
-            right: "-12px",
-            top: "84px",
-            width: "24px",
-            height: "24px",
-            borderRadius: "50%",
-            background: "#635bff",
-            border: "2px solid #1a1a2e",
-            color: "white",
-            cursor: "pointer",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-          className="sidebar-toggle"
-        >
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            style={{
-              transform: sidebarOpen ? "rotate(180deg)" : "none",
-              transition: "transform 0.3s",
-            }}
-          >
-            <path d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
       </aside>
 
       {/* Main Content Wrapper */}
       <div
-        style={{
-          flex: 1,
-          minWidth: 0,
-          marginLeft: sidebarOpen ? "260px" : "72px",
-          width: sidebarOpen ? "calc(100% - 260px)" : "calc(100% - 72px)",
-          transition: "all 0.3s ease",
-        }}
-        className="main-content-wrapper"
+        className={`flex-1 min-w-0 flex flex-col transition-all duration-300 z-10 relative ${
+          sidebarOpen ? "md:ml-64" : "md:ml-20"
+        }`}
       >
-        {/* Top bar */}
-        <header
-          style={{
-            height: "72px",
-            background: "white",
-            borderBottom: "1px solid #e5e7eb",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "0 32px",
-            position: "sticky",
-            top: 0,
-            zIndex: 50,
-          }}
-        >
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {/* Mobile Menu Button */}
+        {/* Topbar / Header */}
+        <header className="h-20 bg-gray-950/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8">
+          <div className="flex items-center gap-4">
+            {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              style={{
-                display: "none",
-                background: "transparent",
-                border: "none",
-                cursor: "pointer",
-                padding: "8px",
-              }}
-              className="mobile-menu-btn"
-              aria-label="Toggle menu"
+              className="p-2 text-gray-400 hover:text-white md:hidden"
             >
-              <motion.div
-                animate={{
-                  rotate: mobileMenuOpen ? 45 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  width: "24px",
-                  height: "2px",
-                  background: "#1a1a2e",
-                  marginBottom: "6px",
-                  borderRadius: "2px",
-                }}
-              />
-              <motion.div
-                animate={{
-                  opacity: mobileMenuOpen ? 0 : 1,
-                }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  width: "24px",
-                  height: "2px",
-                  background: "#1a1a2e",
-                  marginBottom: "6px",
-                  borderRadius: "2px",
-                }}
-              />
-              <motion.div
-                animate={{
-                  rotate: mobileMenuOpen ? -90 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-                style={{
-                  width: "24px",
-                  height: "2px",
-                  background: "#1a1a2e",
-                  borderRadius: "2px",
-                }}
-              />
+              <Menu size={24} />
             </button>
 
-            {/* Page Title */}
-            <h1
-              style={{
-                fontSize: "20px",
-                fontWeight: 600,
-                color: "#1a1a2e",
-                margin: 0,
-              }}
-              className="page-title"
-            >
-              {menuItems.find((item) => item.path === location.pathname)
-                ?.label || "Dashboard"}
-            </h1>
+            {/* Path description / Section Title */}
+            <div>
+              <h1 className="text-lg font-black text-white uppercase tracking-tight">
+                {menuItems.find((item) => item.path === location.pathname)?.label || "Espace Sécurisé"}
+              </h1>
+            </div>
           </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            {userRoleLabel === "PME" && (
+          <div className="flex items-center gap-4">
+            {/* TrustBadge if PME */}
+            {user?.role === "pme" && (
               <div className="hidden sm:block">
                 <TrustBadge level="argent" size="sm" />
               </div>
             )}
-            {/* Search */}
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "10px 16px",
-                background: "#f8f9fa",
-                borderRadius: "10px",
-                border: "1px solid #e5e7eb",
-              }}
-              className="search-box"
-            >
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#9ca3af"
-                strokeWidth="2"
-              >
-                <circle cx="11" cy="11" r="8" />
-                <path d="M21 21l-4.35-4.35" />
-              </svg>
-              <input
-                type="text"
-                placeholder="Rechercher..."
-                style={{
-                  border: "none",
-                  background: "transparent",
-                  outline: "none",
-                  fontSize: "14px",
-                  width: "180px",
-                }}
-                className="search-input"
-              />
+
+            {/* Cmd+K Search Simulation */}
+            <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800/80 text-gray-500 text-xs w-48 hover:border-gray-700 transition-colors cursor-pointer">
+              <Search size={14} />
+              <span className="font-semibold flex-1">Rechercher...</span>
+              <kbd className="bg-gray-800 px-1.5 py-0.5 rounded text-[10px] border border-gray-700">⌘K</kbd>
             </div>
 
             {/* Notifications */}
-            <div style={{ position: "relative" }}>
+            <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                style={{
-                  width: "40px",
-                  height: "40px",
-                  borderRadius: "10px",
-                  background: "#f8f9fa",
-                  border: "1px solid #e5e7eb",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  cursor: "pointer",
-                  position: "relative",
-                }}
+                className="p-2.5 rounded-xl bg-gray-900 border border-gray-800/80 text-gray-400 hover:text-white relative transition-colors"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="#6b7280"
-                  strokeWidth="2"
-                >
-                  <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0" />
-                </svg>
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "-4px",
-                    right: "-4px",
-                    width: "16px",
-                    height: "16px",
-                    background: "#e94560",
-                    borderRadius: "50%",
-                    fontSize: "10px",
-                    color: "white",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontWeight: 600,
-                  }}
-                >
-                  3
-                </span>
+                <Bell size={18} />
+                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-nexus-500 rounded-full border-2 border-gray-950" />
               </button>
 
-              {notificationsOpen && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    right: 0,
-                    marginTop: "8px",
-                    width: "320px",
-                    background: "white",
-                    borderRadius: "12px",
-                    boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-                    border: "1px solid #e5e7eb",
-                    overflow: "hidden",
-                  }}
-                >
-                  <div
-                    style={{
-                      padding: "16px",
-                      borderBottom: "1px solid #e5e7eb",
-                    }}
-                  >
-                    <h3
-                      style={{ fontSize: "14px", fontWeight: 600, margin: 0 }}
+              <AnimatePresence>
+                {notificationsOpen && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setNotificationsOpen(false)} />
+                    <motion.div
+                      initial={{ opacity: 0, y: 15 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: 15 }}
+                      className="absolute right-0 mt-3 w-80 bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden"
                     >
-                      Notifications
-                    </h3>
-                  </div>
-                  <div>
-                    {[
-                      {
-                        title: "Nouvelle formation disponible",
-                        desc: "Marketing digital pour PME",
-                        time: "2h",
-                      },
-                      {
-                        title: "Certificate valide",
-                        desc: "Business Model Canvas",
-                        time: "1j",
-                      },
-                      {
-                        title: "Rappel",
-                        desc: "Completez votre parcours dans 3 jours",
-                        time: "2j",
-                      },
-                    ].map((notif, i) => (
-                      <div
-                        key={i}
-                        style={{
-                          padding: "14px 16px",
-                          borderBottom: i < 2 ? "1px solid #f3f4f6" : "none",
-                          cursor: "pointer",
-                        }}
-                      >
-                        <p
-                          style={{
-                            fontSize: "13px",
-                            fontWeight: 600,
-                            color: "#1a1a2e",
-                            margin: "0 0 4px",
-                          }}
-                        >
-                          {notif.title}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "12px",
-                            color: "#6b7280",
-                            margin: "0 0 4px",
-                          }}
-                        >
-                          {notif.desc}
-                        </p>
-                        <p
-                          style={{
-                            fontSize: "11px",
-                            color: "#9ca3af",
-                            margin: 0,
-                          }}
-                        >
-                          {notif.time}
-                        </p>
+                      <div className="px-4 py-3.5 border-b border-gray-800 flex items-center justify-between">
+                        <span className="text-xs font-bold text-white uppercase tracking-wider">Notifications</span>
+                        <span className="text-[10px] text-nexus-500 font-bold bg-nexus-500/10 px-2 py-0.5 rounded">3 Nouvelles</span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      <div className="divide-y divide-gray-800/60 max-h-80 overflow-y-auto">
+                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-white leading-tight">Nouvelle recommandation IA</p>
+                          <p className="text-[10px] text-gray-400 mt-1">Analyse du radar de maturité disponible.</p>
+                          <p className="text-[9px] text-nexus-500 mt-1 font-bold">Il y a 10m</p>
+                        </div>
+                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-white leading-tight">Nouveau marché détecté</p>
+                          <p className="text-[10px] text-gray-400 mt-1">Un appel d'offres correspond à votre profil.</p>
+                          <p className="text-[9px] text-nexus-500 mt-1 font-bold">Il y a 2h</p>
+                        </div>
+                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-white leading-tight">Formation débloquée</p>
+                          <p className="text-[10px] text-gray-400 mt-1">Accédez à votre nouveau module de formation.</p>
+                          <p className="text-[9px] text-nexus-500 mt-1 font-bold">Hier</p>
+                        </div>
+                      </div>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </header>
 
-        {/* Content */}
-        <main style={{ padding: "32px" }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Outlet />
-          </motion.div>
+        {/* Content Viewport */}
+        <main className="flex-1 p-6 lg:p-8 z-10 relative">
+          <Outlet />
         </main>
       </div>
 
-      {/* Assistant */}
-      <Assistant />
+      {/* Mobile Drawer Navigation */}
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.6 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setMobileMenuOpen(false)}
+              className="fixed inset-0 z-50 bg-black/80"
+            />
+            <motion.aside
+              initial={{ x: "-100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "-100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="fixed top-0 bottom-0 left-0 w-72 bg-gray-950 border-r border-gray-800 z-50 flex flex-col p-6"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-lg shadow-white/5">
+                    <img
+                      src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
+                      alt="BSTPKIT"
+                      className="w-6 h-6 object-contain"
+                    />
+                  </div>
+                  <span className="font-black text-sm text-white uppercase tracking-tight">BSTPKIT CM</span>
+                </div>
+                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">
+                  <X size={20} />
+                </button>
+              </div>
 
-      {/* Responsive Styles */}
-      <style>{`
-        /* Mobile (< 768px) */
-        @media (max-width: 767px) {
-          .desktop-sidebar {
-            display: none !important;
-          }
-          
-          .mobile-menu-btn {
-            display: flex !important;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-          }
-          
-          .main-content-wrapper {
-            margin-left: 0 !important;
-            width: 100% !important;
-          }
-          
-          main {
-            padding: 20px !important;
-          }
-          
-          header {
-            padding: 0 20px !important;
-          }
-          
-          .search-box {
-            display: none !important;
-          }
-          
-          .page-title {
-            font-size: 18px !important;
-          }
-        }
-        
-        /* Tablette (768px - 1023px) */
-        @media (min-width: 768px) and (max-width: 1023px) {
-          .desktop-sidebar {
-            width: 72px !important;
-          }
-          
-          .main-content-wrapper {
-            margin-left: 72px !important;
-            width: calc(100% - 72px) !important;
-          }
-          
-          .sidebar-toggle {
-            display: none !important;
-          }
-          
-          main {
-            padding: 24px !important;
-          }
-        }
-        
-        /* Desktop (> 1024px) */
-        @media (min-width: 1024px) {
-          .mobile-sidebar {
-            display: none !important;
-          }
-          
-          .mobile-overlay {
-            display: none !important;
-          }
-        }
-      `}</style>
+              {/* Mobile menu nav */}
+              <nav className="flex-1 space-y-1">
+                {menuItems.map((item) => {
+                  const isActive = location.pathname === item.path;
+                  const Icon = item.icon;
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
+                        isActive
+                          ? "bg-nexus-500 text-white font-semibold"
+                          : "text-gray-400 hover:text-white hover:bg-gray-900"
+                      }`}
+                    >
+                      <Icon size={18} />
+                      <span className="text-sm">{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </nav>
+
+              {/* Mobile switcher */}
+              <div className="mt-auto border-t border-gray-850 pt-4 space-y-3">
+                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Changer d'acteur (Démo)</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {ROLES.map((role) => (
+                    <button
+                      key={role.id}
+                      onClick={() => {
+                        handleRoleSwitch(role.id, role.path);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`px-3 py-2 rounded-lg text-left text-[11px] font-bold border transition-colors ${
+                        user?.role === role.id
+                          ? "bg-nexus-500/10 border-nexus-500/30 text-nexus-400"
+                          : "bg-gray-900 border-gray-800 text-gray-400 hover:text-white"
+                      }`}
+                    >
+                      {role.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center font-bold text-xs text-nexus-400">
+                    {user?.firstName?.[0] || "U"}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs font-bold text-white leading-tight">{user?.firstName}</p>
+                    <p className="text-[10px] text-gray-500">Connecté</p>
+                  </div>
+                  <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-white">
+                    <LogOut size={16} />
+                  </button>
+                </div>
+              </div>
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Floating chatbot assistant */}
+      <Assistant />
     </div>
   );
 }
-
-export default SharedPrivateLayout;
