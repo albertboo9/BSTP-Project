@@ -35,12 +35,16 @@ const TestLogin = lazy(() => import("./pages/Auth/TestLogin"));
 const TestOrbitalRedesign = lazy(() => import("./pages/TestOrbitalRedesign"));
 // Legacy signup (à supprimer après migration)
 // PME Module
+const DashboardPME = lazy(() => import("./pages/pme/DashboardPME"));
 const Dashboard = lazy(() => import("./pages/Dashboard/Dashboard"));
 const PasseportPME = lazy(() => import("./pages/pme/passeport/PasseportPME"));
 const DashboardParcours = lazy(() => import("./pages/Dashboard/DashboardParcours"));
 
 // DO Module
+const DonneurOrdreDashboard = lazy(() => import("./pages/donneur-ordre/DonneurOrdreDashboard"));
 const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/AnnuaireCertifie"));
+const PublishOpportunityPage = lazy(() => import("./pages/donneur-ordre/PublishOpportunityPage"));
+const SourcingAnalytics = lazy(() => import("./pages/donneur-ordre/SourcingAnalytics"));
 
 // DG Module
 const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
@@ -215,7 +219,7 @@ function App() {
 
           {/* PME Routes */}
           <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard" element={<DashboardPME />} />
             <Route path="/dashboard/passeport" element={<PasseportPME />} />
             <Route path="/dashboard/opportunites" element={<Placeholder title="Appels d'Offres" />} />
             <Route path="/dashboard/suivi-contrat" element={<Placeholder title="Mes Contrats" />} />
@@ -227,10 +231,10 @@ function App() {
 
           {/* Donneur d'Ordre Routes */}
           <Route element={<ProtectedRoute allowedRoles={["donneur_ordre"]}><PrivateLayoutDO /></ProtectedRoute>}>
-            <Route path="/donneur-ordre" element={<Placeholder title="Dashboard Donneur d'Ordre" />} />
+            <Route path="/donneur-ordre" element={<DonneurOrdreDashboard />} />
             <Route path="/donneur-ordre/annuaire" element={<AnnuaireCertifie />} />
-            <Route path="/donneur-ordre/publier" element={<Placeholder title="Publier un AO" />} />
-            <Route path="/donneur-ordre/analytics" element={<Placeholder title="Mes AO / Analytics" />} />
+            <Route path="/donneur-ordre/publier" element={<PublishOpportunityPage />} />
+            <Route path="/donneur-ordre/analytics" element={<SourcingAnalytics />} />
           </Route>
 
           {/* Agent BSTP Routes */}

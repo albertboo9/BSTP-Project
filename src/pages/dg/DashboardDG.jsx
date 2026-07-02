@@ -1,195 +1,206 @@
-import React from 'react';
+import { observatoireData } from '../../data/observatoire.mock';
+import KpiCard from '../../components/ui/KpiCard';
+import StatusPipeline from '../../components/dg/StatusPipeline';
+import CapitalHumainCard from '../../components/dg/CapitalHumainCard';
+import SectorBreakdownChart from '../../components/dg/SectorBreakdownChart';
+import KeyAccountsTable from '../../components/dg/KeyAccountsTable';
+import RegionMap from '../../components/dg/RegionMap';
+import FlagIndicator from '../../components/ui/FlagIndicator';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { useDgStore } from '../../stores/dgStore';
-import StatCard from '../../components/dg/StatCard';
-import { Building2, ShieldCheck, Activity, Users, Download, ArrowRight, Shield, Search, FileText, UserPlus } from 'lucide-react';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
+import { Building2, TrendingUp, DollarSign, Target, Download, RefreshCw } from 'lucide-react';
 
-const COLORS = ['#635bff', '#10b981', '#f59e0b', '#ef4444'];
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4 } }),
+};
+
+function SectionCard({ title, subtitle, children, className = '', delay = 0 }) {
+  return (
+    <motion.div
+      custom={delay}
+      variants={cardVariants}
+      initial="hidden"
+      animate="visible"
+      className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4 ${className}`}
+    >
+      <div>
+        <h3 className="text-base font-bold text-gray-900">{title}</h3>
+        {subtitle && <p className="text-xs font-semibold text-gray-400 mt-0.5">{subtitle}</p>}
+      </div>
+      {children}
+    </motion.div>
+  );
+}
 
 export default function DashboardDG() {
-  const { stats, activities, sectorDistribution } = useDgStore();
+  const { kpis, sparklines, pipeline, capitalHumain, secteurs, donneurs, regions, vigilance } = observatoireData;
 
   const handleExport = () => {
-    toast.loading('Génération du rapport...', { id: 'export' });
-    setTimeout(() => {
-      toast.success('Rapport national généré avec succès !', { id: 'export' });
-    }, 2000);
+    toast.loading('Génération du rapport national...', { id: 'export' });
+    setTimeout(() => toast.success('Rapport PDF généré et prêt au téléchargement.', { id: 'export' }), 2000);
   };
 
-  const getActivityIcon = (type) => {
-    switch(type) {
-      case 'certification': return <Shield size={16} className="text-green-600" />;
-      case 'consultation': return <Search size={16} className="text-indigo-600" />;
-      case 'document': return <FileText size={16} className="text-orange-600" />;
-      case 'registration': return <UserPlus size={16} className="text-blue-600" />;
-      default: return <Activity size={16} />;
-    }
+  const pctTrend = (curr, prev) => {
+    const diff = ((curr - prev) / prev * 100).toFixed(1);
+    return diff >= 0 ? `+${diff}%` : `${diff}%`;
   };
-
-  const getActivityBg = (type) => {
-    switch(type) {
-      case 'certification': return 'bg-green-100';
-      case 'consultation': return 'bg-indigo-100';
-      case 'document': return 'bg-orange-100';
-      case 'registration': return 'bg-blue-100';
-      default: return 'bg-gray-100';
-    }
-  };
+  const pctTrend2 = (curr, prev) => curr >= prev ? 'up' : 'down';
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-12">
-      
-      {/* Header */}
-      <motion.div 
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-8 rounded-3xl border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
+    <div className="space-y-6 pb-16">
+
+      {/* ─── HEADER ─── */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-nexus-900 text-white p-8 rounded-2xl"
       >
         <div>
-          <div className="flex items-center gap-2 mb-2">
-            <span className="bg-gray-900 text-white px-3 py-1 rounded-full text-xs font-bold tracking-wider uppercase">Direction Générale</span>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full mb-3">
+            <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
+            <span className="text-xs font-bold tracking-widest uppercase text-white/80">Cockpit Stratégique National</span>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 tracking-tight">Cockpit Stratégique National</h1>
-          <p className="text-gray-500 mt-2 text-sm font-medium max-w-xl">
-            Vue consolidée en temps réel de l'écosystème de sous-traitance BSTP. Identifiez les tendances de maturité et l'impact de la Marketplace.
+          <h1 className="text-3xl font-black tracking-tight">Direction Générale — Observatoire</h1>
+          <p className="text-white/60 mt-2 text-sm font-medium max-w-xl">
+            Vue consolidée de l'écosystème de sous-traitance BSTP. Données agrégées en temps réel.
           </p>
         </div>
-        
-        <button 
-          onClick={handleExport}
-          className="flex items-center justify-center gap-2 bg-[#635bff] text-white px-6 py-3.5 rounded-2xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 hover:scale-105 active:scale-95 transition-all w-full md:w-auto"
-        >
-          <Download size={20} />
-          <span>Exporter le rapport</span>
-        </button>
+        <div className="flex gap-3">
+          <button onClick={() => toast.info('Synchronisation des données...')} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+            <RefreshCw size={16} /> Synchroniser
+          </button>
+          <button onClick={handleExport} className="flex items-center gap-2 bg-white text-nexus-900 px-5 py-3 rounded-xl font-bold text-sm hover:bg-nexus-50 transition-all shadow-lg">
+            <Download size={16} /> Exporter le rapport
+          </button>
+        </div>
       </motion.div>
 
-      {/* KPI Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          title="Total PME Inscrites" 
-          value={stats.totalPme}
+      {/* ─── BLOC 1 : KPI FLASH ─── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <KpiCard
+          title="PME Référencées"
+          value={kpis.totalPme.toLocaleString()}
           icon={Building2}
-          trend="up"
-          trendValue="+12%"
-          delay={0.1}
+          sparkline={sparklines.totalPme}
+          trend={pctTrend2(kpis.totalPme, kpis.totalPmePrev)}
+          trendValue={pctTrend(kpis.totalPme, kpis.totalPmePrev)}
+          color="nexus" delay={0.1}
         />
-        <StatCard 
-          title="PME Certifiées" 
-          value={stats.certifiedPme}
-          icon={ShieldCheck}
-          trend="up"
-          trendValue="+5%"
-          delay={0.2}
+        <KpiCard
+          title="Maturité Nationale Moyenne"
+          value={kpis.maturitemoyenne}
+          unit="%"
+          icon={TrendingUp}
+          sparkline={sparklines.maturitemoyenne}
+          trend={pctTrend2(kpis.maturitemoyenne, kpis.maturitemoyennePrev)}
+          trendValue={pctTrend(kpis.maturitemoyenne, kpis.maturitemoyennePrev)}
+          color="success" delay={0.2}
         />
-        <StatCard 
-          title="Maturité Moyenne" 
-          value={`${stats.averageMaturity}%`}
-          icon={Activity}
-          trend="up"
-          trendValue="+2%"
-          delay={0.3}
+        <KpiCard
+          title="Volume Économique Capté"
+          value={kpis.volumeFcfaMds}
+          unit="Mds FCFA"
+          icon={DollarSign}
+          sparkline={sparklines.volumeFcfa}
+          trend={pctTrend2(kpis.volumeFcfaMds, kpis.volumeFcfaMdsPrev)}
+          trendValue={pctTrend(kpis.volumeFcfaMds, kpis.volumeFcfaMdsPrev)}
+          color="gold" delay={0.3}
         />
-        <StatCard 
-          title="Consultations (DO)" 
-          value={stats.consultationsThisMonth}
-          icon={Users}
-          trend="up"
-          trendValue="+24%"
-          delay={0.4}
+        <KpiCard
+          title="Taux de Conversion AO → PME"
+          value={kpis.tauxConversion}
+          unit="%"
+          icon={Target}
+          sparkline={sparklines.tauxConversion}
+          trend={pctTrend2(kpis.tauxConversion, kpis.tauxConversionPrev)}
+          trendValue={pctTrend(kpis.tauxConversion, kpis.tauxConversionPrev)}
+          color="warning" delay={0.4}
         />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Sector Distribution */}
-        <motion.div 
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.5 }}
-          className="lg:col-span-1 bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col"
+      {/* ─── BLOC 2 : CHAÎNE DE VALEUR ─── */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <SectionCard
+          title="Pipeline Statutaire des PME"
+          subtitle="Avancement dans le parcours de certification BSTP"
+          delay={4}
         >
-          <h3 className="text-lg font-bold text-gray-900 mb-6">PME par Secteur (Top 4)</h3>
-          <div className="flex-1 min-h-[220px] relative">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={sectorDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={65}
-                  outerRadius={95}
-                  paddingAngle={5}
-                  dataKey="value"
-                  stroke="none"
+          <StatusPipeline pipeline={pipeline} />
+        </SectionCard>
+
+        <SectionCard
+          title="Capital Humain & Formations"
+          subtitle="Impact de la BSTP Academy sur l'écosystème"
+          delay={5}
+        >
+          <CapitalHumainCard data={capitalHumain} />
+        </SectionCard>
+      </div>
+
+      {/* ─── BLOC 3 : VUE MATRICIELLE CROISÉE ─── */}
+      <div>
+        <h2 className="text-lg font-black text-gray-900 mb-4">Vue Matricielle Croisée — Dashboard de Gouvernance</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+          {/* Analyse Sectorielle */}
+          <SectionCard
+            title="Analyse Sectorielle"
+            subtitle="Répartition des PME par filière industrielle"
+            delay={6}
+          >
+            <SectorBreakdownChart data={secteurs} />
+          </SectionCard>
+
+          {/* Analyse Institutionnelle */}
+          <SectionCard
+            title="Analyse Institutionnelle"
+            subtitle="Volume de marchés injectés par donneur d'ordre partenaire"
+            delay={7}
+          >
+            <KeyAccountsTable data={donneurs} />
+          </SectionCard>
+
+          {/* Carte Territoriale */}
+          <SectionCard
+            title="Analyse Territoriale"
+            subtitle="Impact économique par région (nombre de PME)"
+            delay={8}
+          >
+            <RegionMap regions={regions} />
+          </SectionCard>
+
+          {/* Vigilance Opérationnelle */}
+          <SectionCard
+            title="Vigilance Opérationnelle"
+            subtitle="Chantiers en stagnation — Drapeaux rouges actifs"
+            delay={9}
+          >
+            <FlagIndicator
+              count={vigilance.drapeauxRouges}
+              total={vigilance.drapeauxTotal}
+              percent={vigilance.pourcentage}
+            />
+            <div className="mt-2 space-y-2">
+              <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider">Contrats critiques</h4>
+              {vigilance.contratsCritiques.map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => toast.warning(`Contrat ${c.id}`, { description: `PME: ${c.pme} — Bloqué à : "${c.jalonsBloque}" depuis ${c.joursStagnation} jours` })}
+                  className="w-full flex items-center justify-between bg-danger-50 border border-danger-100 rounded-xl px-4 py-3 hover:bg-danger-100 transition-colors text-left"
                 >
-                  {sectorDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip 
-                  contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 25px -5px rgba(0,0,0,0.1)' }}
-                  itemStyle={{ fontWeight: 'bold' }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-            {/* Center Label */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-3xl font-black text-gray-900">{stats.certifiedPme}</span>
-              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Total</span>
+                  <div>
+                    <span className="text-xs font-black text-danger-700">{c.id}</span>
+                    <p className="text-xs font-semibold text-gray-600 mt-0.5">{c.pme} → {c.do}</p>
+                  </div>
+                  <span className="text-xs font-bold text-danger-700 bg-white rounded-lg px-2 py-1 border border-danger-100 flex-shrink-0">
+                    {c.joursStagnation}j
+                  </span>
+                </button>
+              ))}
             </div>
-          </div>
-          <div className="mt-6 space-y-3">
-            {sectorDistribution.map((sector, idx) => (
-              <div key={sector.name} className="flex items-center justify-between text-sm">
-                <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
-                  <span className="font-semibold text-gray-600">{sector.name}</span>
-                </div>
-                <span className="font-bold text-gray-900">{sector.value}%</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
+          </SectionCard>
 
-        {/* Activity Feed */}
-        <motion.div 
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.6 }}
-          className="lg:col-span-2 bg-white rounded-3xl p-8 border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]"
-        >
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-lg font-bold text-gray-900">Activité de la Plateforme</h3>
-            <button className="text-sm font-semibold text-[#635bff] flex items-center gap-1 hover:gap-2 transition-all">
-              Voir l'historique <ArrowRight size={16} />
-            </button>
-          </div>
-          
-          <div className="space-y-6">
-            {activities.map((activity, index) => (
-              <motion.div 
-                key={activity.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.7 + (index * 0.1) }}
-                className="flex gap-4 items-start group cursor-pointer"
-                onClick={() => toast(`Détail de l'événement consulté`, { description: activity.message })}
-              >
-                <div className={`mt-1 p-3 rounded-2xl flex-shrink-0 ${getActivityBg(activity.type)} transition-transform group-hover:scale-110`}>
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div className="flex-1 pb-6 border-b border-gray-50 group-last:border-0 group-last:pb-0">
-                  <p className="text-sm font-semibold text-gray-800 group-hover:text-[#635bff] transition-colors">{activity.message}</p>
-                  <p className="text-xs font-medium text-gray-400 mt-1">{activity.time}</p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-
+        </div>
       </div>
     </div>
   );

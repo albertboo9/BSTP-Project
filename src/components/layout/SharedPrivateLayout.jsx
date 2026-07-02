@@ -15,6 +15,7 @@ import {
   ChevronRight,
   Briefcase,
 } from "lucide-react";
+import TrustBadge from "../ui/TrustBadge";
 
 function SharedPrivateLayout({ menuItems = [], userRoleLabel = "Utilisateur" }) {
   const location = useLocation();
@@ -599,6 +600,11 @@ function SharedPrivateLayout({ menuItems = [], userRoleLabel = "Utilisateur" }) 
           </div>
 
           <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+            {userRoleLabel === "PME" && (
+              <div className="hidden sm:block">
+                <TrustBadge level="argent" size="sm" />
+              </div>
+            )}
             {/* Search */}
             <div
               style={{
