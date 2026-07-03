@@ -52,24 +52,24 @@ export default function DashboardAgent() {
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
-        className="bg-nexus-900 text-white rounded-2xl p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+        className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-soft"
       >
         <div>
-          <div className="inline-flex items-center gap-2 bg-white/10 px-3 py-1 rounded-full mb-3">
-            <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-widest text-white/80">Back-Office Agent BSTP</span>
+          <div className="inline-flex items-center gap-2 bg-nexus-50 px-3 py-1 rounded-full mb-3">
+            <div className="w-2 h-2 rounded-full bg-nexus-500 animate-pulse" />
+            <span className="text-xs font-bold uppercase tracking-widest text-nexus-700">Back-Office Agent BSTP</span>
           </div>
-          <h1 className="text-3xl font-black">Workflow de Certification</h1>
-          <p className="text-white/60 mt-2 text-sm">Auditez, planifiez et arbitrez pour certifier les PME du réseau.</p>
+          <h1 className="text-3xl font-black text-gray-900">Workflow de Certification</h1>
+          <p className="text-gray-500 mt-2 text-sm">Auditez, planifiez et arbitrez pour certifier les PME du réseau.</p>
         </div>
         <div className="flex gap-4">
-          <div className="bg-white/10 rounded-2xl px-5 py-4 text-center">
-            <p className="text-3xl font-black">{pendingCount}</p>
-            <p className="text-[11px] font-bold text-white/50 uppercase tracking-widest mt-1">En attente</p>
+          <div className="bg-nexus-50 rounded-2xl px-5 py-4 text-center">
+            <p className="text-3xl font-black text-nexus-700">{pendingCount}</p>
+            <p className="text-[11px] font-bold text-nexus-400 uppercase tracking-widest mt-1">En attente</p>
           </div>
           {urgentCount > 0 && (
             <div className="bg-danger-500 rounded-2xl px-5 py-4 text-center">
-              <p className="text-3xl font-black">{urgentCount}</p>
+              <p className="text-3xl font-black text-white">{urgentCount}</p>
               <p className="text-[11px] font-bold text-white/80 uppercase tracking-widest mt-1">Urgents</p>
             </div>
           )}

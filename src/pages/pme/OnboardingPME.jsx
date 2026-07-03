@@ -143,23 +143,19 @@ export default function OnboardingPME() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 text-gray-100 flex flex-col items-center justify-center p-4 lg:p-8 relative">
-      {/* Glow Effect */}
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-nexus-500/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl pointer-events-none" />
-
-      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-4 gap-8 z-10">
+    <div className="min-h-screen bg-surface-50 text-gray-900 flex flex-col items-center justify-center p-4 lg:p-8">
+      <div className="max-w-6xl w-full grid grid-cols-1 lg:grid-cols-4 gap-8">
         
         {/* Navigation Sidebar Timeline */}
-        <div className="lg:col-span-1 bg-gray-900/60 border border-gray-800 rounded-3xl p-6 backdrop-blur">
+        <div className="lg:col-span-1 bg-white border border-gray-100 rounded-3xl p-6 shadow-soft">
           <div className="mb-8">
             <span className="text-[10px] text-nexus-500 font-bold uppercase tracking-wider">Parcours Guidé PME</span>
-            <h2 className="text-xl font-black text-white mt-1">Profilage Interactif</h2>
+            <h2 className="text-xl font-black text-gray-900 mt-1">Profilage Interactif</h2>
           </div>
 
           <div className="space-y-6 relative">
             {/* Ligne verticale de liaison */}
-            <div className="absolute left-[15px] top-3 bottom-3 w-[2px] bg-gray-800" />
+            <div className="absolute left-[15px] top-3 bottom-3 w-[2px] bg-gray-200" />
             
             {[
               { num: 1, label: "Identité Légale", icon: Building },
@@ -177,15 +173,15 @@ export default function OnboardingPME() {
                   <div className={`w-8 h-8 rounded-full border flex items-center justify-center transition-all ${
                     isPassed ? 'bg-success-500 border-success-500 text-white' :
                     isActive ? 'bg-nexus-500 border-nexus-500 text-white shadow-lg shadow-nexus-500/30' :
-                    'bg-gray-900 border-gray-800 text-gray-500'
+                    'bg-white border-gray-300 text-gray-400'
                   }`}>
                     <Icon size={14} />
                   </div>
                   <div>
-                    <p className={`text-xs font-bold ${isActive ? 'text-white' : isPassed ? 'text-gray-400' : 'text-gray-500'}`}>
+                    <p className={`text-xs font-bold ${isActive ? 'text-gray-900' : isPassed ? 'text-gray-500' : 'text-gray-400'}`}>
                       {s.label}
                     </p>
-                    <p className="text-[9px] text-gray-600 font-semibold uppercase">Étape {s.num}</p>
+                    <p className="text-[9px] text-gray-400 font-semibold uppercase">Étape {s.num}</p>
                   </div>
                 </div>
               );
@@ -194,7 +190,7 @@ export default function OnboardingPME() {
         </div>
 
         {/* Form Container */}
-        <div className="lg:col-span-3 bg-gray-900/40 border border-gray-800 rounded-3xl p-6 lg:p-8 backdrop-blur flex flex-col justify-between min-h-[500px]">
+        <div className="lg:col-span-3 bg-white border border-gray-100 rounded-3xl p-6 lg:p-8 shadow-soft flex flex-col justify-between min-h-[500px]">
           
           <AnimatePresence mode="wait">
             <motion.div
@@ -209,26 +205,26 @@ export default function OnboardingPME() {
               {currentStep === 1 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Identité Légale de la PME</h3>
-                    <p className="text-xs text-gray-400 mt-1">Saisissez vos identifiants ou importez un document pour préremplir automatiquement.</p>
+                    <h3 className="text-xl font-bold text-gray-900">Identité Légale de la PME</h3>
+                    <p className="text-xs text-gray-500 mt-1">Saisissez vos identifiants ou importez un document pour préremplir automatiquement.</p>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Raison Sociale</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Raison Sociale</label>
                       <input
                         type="text"
                         {...regId('raisonSociale')}
                         placeholder="Ex: SARL Cameroun Industrie"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900"
                       />
                       {errId.raisonSociale && <p className="text-xs text-danger-500 mt-1 font-semibold">{errId.raisonSociale.message}</p>}
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Forme Juridique</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Forme Juridique</label>
                       <select
                         {...regId('formeJuridique')}
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-3 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900"
                       >
                         <option value="">Sélectionner...</option>
                         <option value="SARL">SARL</option>
@@ -241,32 +237,32 @@ export default function OnboardingPME() {
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Numéro RCCM</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Numéro RCCM</label>
                       <input
                         type="text"
                         {...regId('rccm')}
                         placeholder="Ex: RC/DLA/2026/B/1234"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900"
                       />
                       {errId.rccm && <p className="text-xs text-danger-500 mt-1 font-semibold">{errId.rccm.message}</p>}
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Numéro d'Identifiant Unique (NIU)</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Numéro d'Identifiant Unique (NIU)</label>
                       <input
                         type="text"
                         {...regId('niu')}
                         placeholder="Ex: M123456789012X"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900"
                       />
                       {errId.niu && <p className="text-xs text-danger-500 mt-1 font-semibold">{errId.niu.message}</p>}
                     </div>
                   </div>
 
                   {/* OCR Trigger CTA */}
-                  <div className="p-4 bg-nexus-500/5 border border-nexus-500/10 rounded-2xl flex items-center justify-between gap-4">
+                  <div className="p-4 bg-nexus-50 border border-nexus-100 rounded-2xl flex items-center justify-between gap-4">
                     <div>
-                      <h4 className="text-xs font-bold text-nexus-400 uppercase tracking-wider">Fast-track OCR Intelligent</h4>
-                      <p className="text-[10px] text-gray-400 mt-0.5">Importez votre RCCM ou NIU pour remplir automatiquement ces champs légaux en 2s.</p>
+                      <h4 className="text-xs font-bold text-nexus-700 uppercase tracking-wider">Fast-track OCR Intelligent</h4>
+                      <p className="text-[10px] text-gray-500 mt-0.5">Importez votre RCCM ou NIU pour remplir automatiquement ces champs légaux en 2s.</p>
                     </div>
                     <button
                       type="button"
@@ -284,12 +280,12 @@ export default function OnboardingPME() {
               {currentStep === 2 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Secteurs & Zone d'Activité</h3>
-                    <p className="text-xs text-gray-400 mt-1">Ceci permet le Smart Matchmaking géographique et sectoriel.</p>
+                    <h3 className="text-xl font-bold text-gray-900">Secteurs & Zone d'Activité</h3>
+                    <p className="text-xs text-gray-500 mt-1">Ceci permet le Smart Matchmaking géographique et sectoriel.</p>
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase block mb-2">Secteur(s) d'Activité principal</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Secteur(s) d'Activité principal</label>
                     <div className="flex flex-wrap gap-2">
                       {SECTEURS.map(s => {
                         const isSel = sectorsSelected.includes(s);
@@ -301,7 +297,7 @@ export default function OnboardingPME() {
                               setSectorsSelected(prev => isSel ? prev.filter(x => x !== s) : [...prev, s]);
                             }}
                             className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                              isSel ? 'bg-nexus-500/10 border-nexus-500 text-nexus-400' : 'bg-gray-950 border-gray-800 text-gray-500'
+                              isSel ? 'bg-nexus-50 border-nexus-500 text-nexus-700' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
                             }`}
                           >
                             {s}
@@ -312,7 +308,7 @@ export default function OnboardingPME() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-bold text-gray-400 uppercase block mb-2">Région(s) de présence</label>
+                    <label className="text-xs font-bold text-gray-500 uppercase block mb-2">Région(s) de présence</label>
                     <div className="flex flex-wrap gap-2">
                       {REGIONS.map(r => {
                         const isSel = regionsSelected.includes(r);
@@ -324,7 +320,7 @@ export default function OnboardingPME() {
                               setRegionsSelected(prev => isSel ? prev.filter(x => x !== r) : [...prev, r]);
                             }}
                             className={`px-3 py-2 rounded-xl text-xs font-bold border transition-all ${
-                              isSel ? 'bg-nexus-500/10 border-nexus-500 text-nexus-400' : 'bg-gray-950 border-gray-800 text-gray-500'
+                              isSel ? 'bg-nexus-50 border-nexus-500 text-nexus-700' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
                             }`}
                           >
                             {r}
@@ -340,36 +336,36 @@ export default function OnboardingPME() {
               {currentStep === 3 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Indicateurs de Performance & Capacité</h3>
-                    <p className="text-xs text-gray-400 mt-1">Ces chiffres seront vérifiés lors de l'audit terrain par l'Agent BSTP.</p>
+                    <h3 className="text-xl font-bold text-gray-900">Indicateurs de Performance & Capacité</h3>
+                    <p className="text-xs text-gray-500 mt-1">Ces chiffres seront vérifiés lors de l'audit terrain par l'Agent BSTP.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Nombre d'employés</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Nombre d'employés</label>
                       <input
                         type="number"
                         {...regCap('effectifs')}
                         placeholder="Ex: 24"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white font-bold"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900 font-bold"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Chiffre d'Affaires annuel (FCFA)</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Chiffre d'Affaires annuel (FCFA)</label>
                       <input
                         type="number"
                         {...regCap('chiffreAffaires')}
                         placeholder="Ex: 50000000"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white font-bold"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900 font-bold"
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold text-gray-400 uppercase block mb-1">Marchés Publics / Privés Réalisés</label>
+                      <label className="text-xs font-bold text-gray-500 uppercase block mb-1">Marchés Publics / Privés Réalisés</label>
                       <input
                         type="number"
                         {...regCap('marchesRealises')}
                         placeholder="Ex: 12"
-                        className="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-white font-bold"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-nexus-500 text-gray-900 font-bold"
                       />
                     </div>
                   </div>
@@ -380,8 +376,8 @@ export default function OnboardingPME() {
               {currentStep === 4 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Auto-évaluation Préliminaire</h3>
-                    <p className="text-xs text-gray-400 mt-1">Evaluez vous-même le score de maturité actuel de votre entreprise sur ces 6 axes clés (Note sur 20).</p>
+                    <h3 className="text-xl font-bold text-gray-900">Auto-évaluation Préliminaire</h3>
+                    <p className="text-xs text-gray-500 mt-1">Evaluez vous-même le score de maturité actuel de votre entreprise sur ces 6 axes clés (Note sur 20).</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -395,8 +391,8 @@ export default function OnboardingPME() {
                     ].map(axe => (
                       <div key={axe.key} className="space-y-2">
                         <div className="flex items-center justify-between">
-                          <span className="text-xs font-bold text-white">{axe.label}</span>
-                          <span className="text-xs font-black text-nexus-400">{evaluation[axe.key]}/20</span>
+                          <span className="text-xs font-bold text-gray-700">{axe.label}</span>
+                          <span className="text-xs font-black text-nexus-500">{evaluation[axe.key]}/20</span>
                         </div>
                         <input
                           type="range"
@@ -404,7 +400,7 @@ export default function OnboardingPME() {
                           max="20"
                           value={evaluation[axe.key]}
                           onChange={(e) => setEvaluation(prev => ({ ...prev, [axe.key]: parseInt(e.target.value) }))}
-                          className="w-full accent-nexus-500 h-1 bg-gray-800 rounded-lg appearance-none cursor-pointer"
+                          className="w-full accent-nexus-500 h-1 bg-gray-200 rounded-lg appearance-none cursor-pointer"
                         />
                       </div>
                     ))}
@@ -416,8 +412,8 @@ export default function OnboardingPME() {
               {currentStep === 5 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white">Téléversement des Pièces Justificatives</h3>
-                    <p className="text-xs text-gray-400 mt-1">Importez vos pièces obligatoires. L'IA extrait les dates de validité en temps réel.</p>
+                    <h3 className="text-xl font-bold text-gray-900">Téléversement des Pièces Justificatives</h3>
+                    <p className="text-xs text-gray-500 mt-1">Importez vos pièces obligatoires. L'IA extrait les dates de validité en temps réel.</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -427,20 +423,20 @@ export default function OnboardingPME() {
                       { key: 'cnps', label: "Attestation CNPS" },
                       { key: 'attestationFiscale', label: "Attestation de Situation Fiscale" }
                     ].map(doc => (
-                      <div key={doc.key} className="p-5 bg-gray-950 border border-gray-800 rounded-2xl flex items-center justify-between gap-4">
+                      <div key={doc.key} className="p-5 bg-gray-50 border border-gray-100 rounded-2xl flex items-center justify-between gap-4">
                         <div>
-                          <p className="text-xs font-bold text-white">{doc.label}</p>
-                          <p className="text-[10px] text-gray-500 mt-0.5">Format PDF ou PNG supporté.</p>
+                          <p className="text-xs font-bold text-gray-900">{doc.label}</p>
+                          <p className="text-[10px] text-gray-400 mt-0.5">Format PDF ou PNG supporté.</p>
                         </div>
                         {documents[doc.key] ? (
-                          <div className="flex items-center gap-1.5 text-xs text-success-400 font-bold bg-success-500/10 px-3 py-1.5 rounded-xl border border-success-500/20">
+                          <div className="flex items-center gap-1.5 text-xs text-success-600 font-bold bg-success-50 px-3 py-1.5 rounded-xl border border-success-200">
                             <FileCheck size={14} /> Validé
                           </div>
                         ) : (
                           <button
                             type="button"
                             onClick={() => handleDocUpload(doc.key)}
-                            className="p-2 bg-gray-900 hover:bg-gray-850 border border-gray-800 rounded-xl text-gray-400 hover:text-white transition-colors"
+                            className="p-2 bg-white hover:bg-gray-50 border border-gray-200 rounded-xl text-gray-400 hover:text-gray-600 transition-colors"
                           >
                             <UploadCloud size={18} />
                           </button>
@@ -455,10 +451,10 @@ export default function OnboardingPME() {
               {currentStep === 6 && (
                 <div className="space-y-6">
                   <div>
-                    <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                      <Wand2 size={20} className="text-nexus-400" /> Analyse IA & Profil Qualifié Généré
+                    <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                      <Wand2 size={20} className="text-nexus-500" /> Analyse IA & Profil Qualifié Généré
                     </h3>
-                    <p className="text-xs text-gray-400 mt-1">Calibré par rapport aux normes ONUDI, OHADA et Loi Cameroun Local Content 2025.</p>
+                    <p className="text-xs text-gray-500 mt-1">Calibré par rapport aux normes ONUDI, OHADA et Loi Cameroun Local Content 2025.</p>
                   </div>
 
                   {maturityResults && (
@@ -479,23 +475,23 @@ export default function OnboardingPME() {
 
                       {/* AI Diagnostics & Recommendations */}
                       <div className="space-y-4">
-                        <div className="p-4 bg-nexus-500/5 border border-nexus-500/10 rounded-2xl">
-                          <p className="text-xs font-bold text-nexus-400 uppercase tracking-wider">Diagnostic Global</p>
-                          <p className="text-xs text-gray-300 mt-1 font-semibold">
-                            Score prévisionnel de maturité : <span className="text-white font-black text-sm">{maturityResults.scoreGlobal}/100</span>.
+                        <div className="p-4 bg-nexus-50 border border-nexus-100 rounded-2xl">
+                          <p className="text-xs font-bold text-nexus-700 uppercase tracking-wider">Diagnostic Global</p>
+                          <p className="text-xs text-gray-600 mt-1 font-semibold">
+                            Score prévisionnel de maturité : <span className="text-nexus-700 font-black text-sm">{maturityResults.scoreGlobal}/100</span>.
                             Votre entreprise est éligible au programme d'accompagnement de la BSTP.
                           </p>
                         </div>
 
                         <div className="space-y-2.5 max-h-56 overflow-y-auto">
-                          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Écarts et actions correctives IA</p>
+                          <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Écarts et actions correctives IA</p>
                           {maturityResults.ecarts.map((ecart, i) => (
-                            <div key={i} className="p-3 bg-gray-950 border border-gray-850 rounded-xl space-y-1">
-                              <p className="text-[10px] text-nexus-400 font-black uppercase">{ecart.axe}</p>
-                              <p className="text-[11px] text-gray-300 font-medium">{ecart.constat}</p>
-                              <p className="text-[10px] text-success-400 font-semibold">✓ {ecart.recommandation}</p>
+                            <div key={i} className="p-3 bg-gray-50 border border-gray-100 rounded-xl space-y-1">
+                              <p className="text-[10px] text-nexus-600 font-black uppercase">{ecart.axe}</p>
+                              <p className="text-[11px] text-gray-600 font-medium">{ecart.constat}</p>
+                              <p className="text-[10px] text-success-600 font-semibold">✓ {ecart.recommandation}</p>
                               {ecart.referenceNormative && (
-                                <p className="text-[9px] text-gray-500 font-bold uppercase mt-1">Ref: {ecart.referenceNormative}</p>
+                                <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">Ref: {ecart.referenceNormative}</p>
                               )}
                             </div>
                           ))}
@@ -510,11 +506,11 @@ export default function OnboardingPME() {
           </AnimatePresence>
 
           {/* Navigation Controls */}
-          <div className="flex items-center justify-between border-t border-gray-800/80 pt-6 mt-6">
+          <div className="flex items-center justify-between border-t border-gray-100 pt-6 mt-6">
             <button
               onClick={prevStep}
               disabled={currentStep === 1 || loading}
-              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-white transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             >
               <ChevronLeft size={16} /> Précédent
             </button>
@@ -523,7 +519,7 @@ export default function OnboardingPME() {
               <button
                 onClick={triggerMaturityAI}
                 disabled={loading}
-                className="flex items-center gap-1.5 px-5 py-3 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-nexus-500/20"
+                className="flex items-center gap-1.5 px-5 py-3 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-black rounded-xl transition-all shadow-soft"
               >
                 {loading ? "Calcul en cours..." : (
                   <>
@@ -534,7 +530,7 @@ export default function OnboardingPME() {
             ) : currentStep === 6 ? (
               <button
                 onClick={handleFinalSubmit}
-                className="flex items-center gap-1.5 px-5 py-3 bg-success-600 hover:bg-success-700 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-success-600/20"
+                className="flex items-center gap-1.5 px-5 py-3 bg-success-600 hover:bg-success-700 text-white text-xs font-black rounded-xl transition-all shadow-soft"
               >
                 Valider & Soumettre le Dossier
               </button>

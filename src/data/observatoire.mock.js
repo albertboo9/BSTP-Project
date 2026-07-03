@@ -67,6 +67,7 @@ export const observatoireData = {
     { name: "Nord-Ouest", pme: 98, volume: 3.1 },
     { name: "Adamaoua", pme: 65, volume: 2.4 },
     { name: "Nord", pme: 48, volume: 1.5 },
+    { name: "Extrême-Nord", pme: 35, volume: 0.8 },
     { name: "Est", pme: 30, volume: 0.9 },
     { name: "Sud", pme: 17, volume: 0.2 },
   ],
