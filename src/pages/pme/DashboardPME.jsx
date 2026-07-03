@@ -57,7 +57,7 @@ export default function DashboardPME() {
         <div>
           <p className="text-nexus-500 text-sm font-bold uppercase tracking-widest mb-2">Espace Croissance PME</p>
           <h1 className="text-3xl font-black tracking-tight text-gray-900">
-            Bonjour, {user?.firstName || 'PME'}
+            Bonjour, 
           </h1>
           <p className="text-gray-500 mt-2 font-medium text-sm max-w-lg">
             Votre tableau de bord de pilotage. Complétez votre Passeport pour accéder aux appels d'offres qualifiés.
