@@ -1,14 +1,14 @@
 import { motion } from 'framer-motion';
 import { GraduationCap, Award, BookOpen, Users } from 'lucide-react';
-import KpiCard from '../../components/ui/KpiCard';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { observatoireData } from '../../data/observatoire.mock';
 
-const RECENT_GRADUATES = [
-  { pme: "Alpha Industrial Services", course: "Local Content Cameroun 2025", date: "02.07.2026", status: "Certifié" },
-  { pme: "SIMTECH 3D", course: "Système de Management Qualité ISO 9001", date: "30.06.2026", status: "Certifié" },
-  { pme: "BatiConstruct Sarl", course: "Initiation HSE", date: "28.06.2026", status: "En cours" }
-];
+const COLORS = ['#635bff', '#0ea5e9', '#22c55e', '#f59e0b'];
 
 export default function CapitalHumainPage() {
+  const { capitalHumain } = observatoireData;
+  const { heuresCumulees, certificationsByModule } = capitalHumain;
+
   return (
     <div className="space-y-6 pb-16">
       
@@ -30,70 +30,77 @@ export default function CapitalHumainPage() {
         </div>
       </motion.div>
 
-      {/* Stats row */}
+      {/* Stats row — real data from mock */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <KpiCard
-          title="Certifications Délivrées"
-          value={142}
-          icon={Award}
-          sparkline={[10, 20, 35, 50, 75, 95, 110, 130, 142]}
-          trend="up"
-          trendValue="+12%"
-          color="success"
-        />
-        <KpiCard
-          title="Apprenants Actifs"
-          value={384}
-          icon={Users}
-          sparkline={[100, 150, 210, 260, 310, 350, 384]}
-          trend="up"
-          trendValue="+8.5%"
-          color="nexus"
-        />
-        <KpiCard
-          title="Heures de Formation"
-          value="1,420"
-          icon={BookOpen}
-          sparkline={[500, 700, 950, 1100, 1300, 1420]}
-          trend="up"
-          trendValue="+15%"
-          color="gold"
-        />
-      </div>
-
-      {/* Graduate tracking table */}
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-        <h3 className="text-sm font-bold text-white mb-4">Certifications et Montée en Compétence Récentes</h3>
-        <div className="overflow-x-auto">
-          <table className="w-full text-xs">
-            <thead>
-              <tr className="border-b border-gray-800 text-gray-500 text-left">
-                <th className="pb-3 uppercase tracking-wider font-bold">PME Apprenante</th>
-                <th className="pb-3 uppercase tracking-wider font-bold">Module Validé</th>
-                <th className="pb-3 uppercase tracking-wider font-bold">Date de complétion</th>
-                <th className="pb-3 uppercase tracking-wider font-bold text-right">Statut</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-850">
-              {RECENT_GRADUATES.map((g, idx) => (
-                <tr key={idx} className="hover:bg-gray-950/40">
-                  <td className="py-3.5 font-bold text-white">{g.pme}</td>
-                  <td className="py-3.5 text-gray-300 font-semibold">{g.course}</td>
-                  <td className="py-3.5 text-gray-400 font-semibold">{g.date}</td>
-                  <td className="py-3.5 text-right">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold ${
-                      g.status === 'Certifié' ? 'text-success-400 bg-success-500/10' : 'text-warning-400 bg-warning-500/10'
-                    }`}>
-                      {g.status}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-success-100 rounded-xl flex items-center justify-center">
+              <Award size={20} className="text-success-600" />
+            </div>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Certifications Délivrées</span>
+          </div>
+          <span className="text-3xl font-black text-gray-900">{certificationsByModule.reduce((a, b) => a + b.count, 0)}</span>
+          <span className="text-sm text-gray-400 font-semibold ml-1">PME certifiées</span>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-nexus-100 rounded-xl flex items-center justify-center">
+              <Users size={20} className="text-nexus-600" />
+            </div>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Apprenants Actifs</span>
+          </div>
+          <span className="text-3xl font-black text-gray-900">384</span>
+          <span className="text-sm text-gray-400 font-semibold ml-1">en formation</span>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 bg-gold-100 rounded-xl flex items-center justify-center">
+              <BookOpen size={20} className="text-gold-600" />
+            </div>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Heures de Formation</span>
+          </div>
+          <span className="text-3xl font-black text-gray-900">{heuresCumulees.toLocaleString()}</span>
+          <span className="text-sm text-gray-400 font-semibold ml-1">heures</span>
         </div>
       </div>
 
+      {/* Certifications by Module — BarChart */}
+      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-soft">
+        <h3 className="text-base font-bold text-gray-900 mb-1">PME Certifiées par Module</h3>
+        <p className="text-xs text-gray-400 font-semibold mb-6">Répartition des certifications BSTP Academy par filière de formation</p>
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={certificationsByModule} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
+              <XAxis dataKey="module" tick={{ fontSize: 12, fontWeight: 600, fill: '#6b7280' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: '#9ca3af' }} axisLine={false} tickLine={false} />
+              <Tooltip
+                contentStyle={{ borderRadius: 12, border: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.05)', fontSize: 12 }}
+                labelStyle={{ fontWeight: 700, color: '#111827' }}
+              />
+              <Bar dataKey="count" radius={[8, 8, 0, 0]} barSize={56}>
+                {certificationsByModule.map((_, idx) => (
+                  <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Module detail cards */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        {certificationsByModule.map((mod, idx) => (
+          <div key={mod.module} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+            <div className="flex items-center gap-2 mb-2">
+              <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx] }} />
+              <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">{mod.module}</span>
+            </div>
+            <span className="text-2xl font-black text-gray-900">{mod.count}</span>
+            <span className="text-xs text-gray-400 font-semibold ml-1">PME</span>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
