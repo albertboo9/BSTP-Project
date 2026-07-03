@@ -1,63 +1,100 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-import { Building2, MapPin, BarChart3, Upload, Sparkles, CheckCircle2, ChevronRight, ChevronLeft, Target, Users, DollarSign, ScanLine, ArrowRight, ShieldCheck } from 'lucide-react';
 import { runMaturityRadar } from '../../services/ai/aiFeatures';
 import { useAIFeature } from '../../hooks/useAIFeature';
+import RadarChartCard from '../../components/ui/RadarChartCard';
+import AIResultModal from '../../components/ui/AIResultModal';
+import {
+  Building2, MapPin, BarChart3, Upload, Sparkles, CheckCircle2, ChevronRight, ChevronLeft,
+  Shuffle, Target, Users, DollarSign, Briefcase, ScanLine, PartyPopper, Rocket, ArrowRight
+} from 'lucide-react';
 
 const SECTEURS = ['BTP', 'Métallurgie', 'Informatique', 'Logistique', 'Agro-industrie', 'Télécoms', 'Énergie', 'Industrie'];
 const REGIONS = ['Littoral', 'Centre', 'Ouest', 'Sud-Ouest', 'Nord-Ouest', 'Adamaoua', 'Nord', 'Est', 'Sud', 'Extrême-Nord'];
 
 const STEPS = [
-  { id: 'identity', label: 'Identité Légal', icon: Building2, desc: 'Infos générales' },
-  { id: 'sectors', label: 'Secteurs & Zone', icon: MapPin, desc: 'Votre marché' },
-  { id: 'capacity', label: 'Capacités', icon: BarChart3, desc: 'Finance & RH' },
-  { id: 'documents', label: 'Documents OCR', icon: ScanLine, desc: 'Upload IA' },
-  { id: 'analysis', label: 'Analyse IA', icon: Sparkles, desc: 'Génération Profil' },
+  { id: 'identity', label: 'Identité', icon: Building2, desc: 'Vos informations légales' },
+  { id: 'sectors', label: 'Ciblage', icon: MapPin, desc: 'Secteurs & régions' },
+  { id: 'capacity', label: 'Capacité', icon: BarChart3, desc: 'Indicateurs clés' },
+  { id: 'evaluation', label: 'Auto-évaluation', icon: Target, desc: 'Votre maturité' },
+  { id: 'documents', label: 'Documents', icon: Upload, desc: 'Pièces justificatives' },
+  { id: 'analysis', label: 'Analyse IA', icon: Sparkles, desc: 'Radar & scoring' },
 ];
 
 const FORM_LAW = ['SARL', 'SA', 'ETS', 'SAS', 'SNC'];
 
-// Framer Motion Variants
-const slideVariants = {
-  enter: (direction) => ({
-    x: direction > 0 ? 50 : -50,
-    opacity: 0,
-    scale: 0.95
-  }),
-  center: {
-    zIndex: 1,
-    x: 0,
-    opacity: 1,
-    scale: 1,
-    transition: { duration: 0.4, type: "spring", stiffness: 300, damping: 30 }
-  },
-  exit: (direction) => ({
-    zIndex: 0,
-    x: direction < 0 ? 50 : -50,
-    opacity: 0,
-    scale: 0.95,
-    transition: { duration: 0.3 }
-  })
-};
+function ProgressParticles() {
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden">
+      {[0, 1, 2].map(i => (
+        <motion.div
+          key={i}
+          className="absolute w-1.5 h-1.5 rounded-full bg-nexus-400/30"
+          initial={{ x: '50%', y: '100%', opacity: 1 }}
+          animate={{ x: `${30 + i * 30}%`, y: '-10%', opacity: 0 }}
+          transition={{ duration: 2 + i * 0.5, repeat: Infinity, delay: i * 0.8 }}
+        />
+      ))}
+    </div>
+  );
+}
+
+function StepIcon({ step, currentStep, index }) {
+  const Icon = step.icon;
+  const isDone = currentStep > index;
+  const isActive = currentStep === index;
+  return (
+    <motion.div
+      className={`relative w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+        isDone ? 'bg-success-500 text-white shadow-lg shadow-success-200' :
+        isActive ? 'bg-nexus-500 text-white shadow-lg shadow-nexus-200' :
+        'bg-gray-100 text-gray-400'
+      }`}
+      animate={isActive ? { scale: [1, 1.08, 1] } : {}}
+      transition={{ repeat: Infinity, duration: 2 }}
+    >
+      {isDone ? <CheckCircle2 size={18} /> : <Icon size={18} />}
+      {isActive && <span className="absolute -inset-1 rounded-2xl border-2 border-nexus-200 animate-ping opacity-40" />}
+    </motion.div>
+  );
+}
+
+function SlidePanel({ children, isVisible }) {
+  return (
+    <AnimatePresence mode="wait">
+      {isVisible && (
+        <motion.div
+          key={isVisible}
+          initial={{ opacity: 0, x: 30, scale: 0.98 }}
+          animate={{ opacity: 1, x: 0, scale: 1 }}
+          exit={{ opacity: 0, x: -30, scale: 0.98 }}
+          transition={{ duration: 0.35, ease: [0.25, 0.1, 0.25, 1] }}
+          className="w-full"
+        >
+          {children}
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+}
 
 export default function OnboardingPME() {
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const [step, setStep] = useState(0);
-  const [direction, setDirection] = useState(1);
-  const { data: aiData, isLoading: aiLoading, execute: runAI } = useAIFeature(runMaturityRadar);
+  const [loading, setLoading] = useState(false);
+  const [maturityResults, setMaturityResults] = useState(null);
+  const [submitted, setSubmitted] = useState(false);
+  const { data: aiData, isLoading: aiLoading, isFallback, showResult, closeResult, execute: runAI } = useAIFeature(runMaturityRadar);
 
   // Form state
   const [form, setForm] = useState({
     raisonSociale: '', formeJuridique: '', rccm: '', niu: '',
     secteurs: [], regions: [],
-    effectifs: '', chiffreAffaires: '',
+    effectifs: '', chiffreAffaires: '', marchesRealises: '',
   });
 
-  const [docs, setDocs] = useState({ rccm: false, niu: false });
+  const [evaluation, setEvaluation] = useState({ gouvernance: 12, qualite: 10, conformiteLegale: 8, capaciteFinanciere: 14, capaciteTechnique: 13, rseHqse: 9 });
+  const [docs, setDocs] = useState({ rccm: false, niu: false, cnps: false, fiscal: false });
   const [ocrLoading, setOcrLoading] = useState('');
 
   const update = (field, value) => setForm(f => ({ ...f, [field]: value }));
@@ -69,30 +106,16 @@ export default function OnboardingPME() {
     if (step === 0) return form.raisonSociale.length >= 3 && form.formeJuridique && form.rccm.length >= 3;
     if (step === 1) return form.secteurs.length > 0 && form.regions.length > 0;
     if (step === 2) return form.effectifs > 0 && form.chiffreAffaires >= 100000;
-    if (step === 3) return docs.rccm || docs.niu;
+    if (step === 3) return true;
+    if (step === 4) return Object.values(docs).some(v => v);
     return true;
-  };
-
-  const nextStep = () => {
-    if (!canProceed()) {
-      toast.error("Veuillez remplir tous les champs obligatoires.");
-      return;
-    }
-    if (step === STEPS.length - 2) {
-      triggerAI();
-    }
-    setDirection(1);
-    setStep(s => s + 1);
-  };
-
-  const prevStep = () => {
-    setDirection(-1);
-    setStep(s => s - 1);
   };
 
   const handleOCR = (docType) => {
     setOcrLoading(docType);
-    toast.info(`Analyse OCR de votre ${docType.toUpperCase()} en cours...`);
+    toast.info(`Analyse intelligente du ${docType.toUpperCase()}...`, {
+      description: "Extraction des champs par Llama Scout OCR"
+    });
     setTimeout(() => {
       setOcrLoading('');
       setDocs(d => ({ ...d, [docType]: true }));
@@ -102,296 +125,413 @@ export default function OnboardingPME() {
         update('formeJuridique', 'SA');
       }
       if (docType === 'niu') update('niu', 'M082612745367Y');
-      toast.success(`${docType.toUpperCase()} validé par l'IA.`);
-    }, 2500);
+      toast.success(`${docType.toUpperCase()} analysé avec succès !`, {
+        description: "Champs pré-remplis automatiquement."
+      });
+    }, 2000);
   };
 
   const triggerAI = async () => {
-    toast.loading("Génération de votre profil via IA...", { id: 'ai-gen' });
+    setLoading(true);
+    toast.loading('Analyse de maturité en cours...', { id: 'maturity' });
     const res = await runAI({
-      pmeId: user?.id || 'pme_temp',
-      autoEvaluation: { gouvernance: 15, qualite: 12 },
+      pmeId: 'temp',
+      autoEvaluation: evaluation,
       documentsDejaFournis: Object.keys(docs).filter(k => docs[k])
     });
-    toast.success("Profil généré avec succès !", { id: 'ai-gen' });
+    setLoading(false);
   };
 
+  // When AI data arrives, set maturity results and advance step
+  if (aiData && !maturityResults) {
+    setMaturityResults(aiData);
+    toast.success('Analyse IA terminée !', { id: 'maturity', description: 'Votre radar de maturité a été généré.' });
+    setStep(5);
+  }
+
+  const handleSubmit = () => {
+    setSubmitted(true);
+    toast.success('Félicitations ! Votre profil est complet.', {
+      description: 'Vous allez être redirigé vers votre tableau de bord.',
+      icon: <PartyPopper className="text-success-500" />
+    });
+    setTimeout(() => window.location.href = '/dashboard', 2000);
+  };
+
+  const progress = Math.round(((step + 1) / STEPS.length) * 100);
+
+  if (submitted) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-nexus-900 via-nexus-800 to-nexus-900 flex items-center justify-center p-8">
+        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="text-center max-w-md">
+          <motion.div animate={{ rotate: [0, 5, -5, 0] }} transition={{ repeat: Infinity, duration: 3 }} className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-8">
+            <PartyPopper size={48} className="text-gold-400" />
+          </motion.div>
+          <h1 className="text-4xl font-black text-white mb-4">Profil Complété !</h1>
+          <p className="text-white/60 text-lg mb-8">Votre entreprise est désormais prête à recevoir des opportunités. Bienvenue dans l'écosystème BSTP.</p>
+          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }} className="w-8 h-8 border-2 border-white/30 border-t-white rounded-full mx-auto" />
+        </motion.div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-[80vh] flex flex-col justify-center items-center py-10 px-4 sm:px-6">
-      
-      <div className="w-full max-w-4xl">
-        
-        {/* HEADER / TIMELINE */}
-        <div className="mb-10 relative">
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-100 -translate-y-1/2 rounded-full z-0 overflow-hidden">
-             <motion.div 
-               className="h-full bg-indigo-500 rounded-full"
-               initial={{ width: 0 }}
-               animate={{ width: `${(step / (STEPS.length - 1)) * 100}%` }}
-               transition={{ duration: 0.5, ease: "easeInOut" }}
-             />
+    <div className="min-h-screen bg-gradient-to-br from-surface-50 to-white flex flex-col lg:flex-row">
+      {/* Left sidebar — Steps timeline */}
+      <div className="lg:w-80 bg-white border-r border-gray-100 p-6 lg:p-8 flex flex-col gap-6">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 bg-nexus-500 rounded-2xl flex items-center justify-center">
+            <Rocket size={20} className="text-white" />
           </div>
-          
-          <div className="relative z-10 flex justify-between items-center px-2">
-            {STEPS.map((s, i) => {
-              const Icon = s.icon;
-              const isActive = i === step;
-              const isPast = i < step;
-              return (
-                <div key={s.id} className="flex flex-col items-center">
-                  <motion.div 
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-sm border-2 transition-colors duration-300 ${
-                      isActive ? 'bg-indigo-600 border-indigo-600 text-white shadow-indigo-200' :
-                      isPast ? 'bg-white border-indigo-500 text-indigo-500' :
-                      'bg-white border-gray-200 text-gray-300'
-                    }`}
-                    animate={isActive ? { scale: [1, 1.05, 1] } : { scale: 1 }}
-                    transition={{ repeat: isActive ? Infinity : 0, duration: 2 }}
-                  >
-                    {isPast ? <CheckCircle2 size={20} /> : <Icon size={20} />}
-                  </motion.div>
-                  <p className={`mt-3 text-[11px] font-bold uppercase tracking-widest ${isActive ? 'text-indigo-600' : 'text-gray-400'}`}>
-                    {s.label}
-                  </p>
-                </div>
-              );
-            })}
+          <div>
+            <p className="text-[10px] text-nexus-500 font-black uppercase tracking-widest">Espace Croissance</p>
+            <h2 className="text-lg font-black text-gray-900">Profilage Guidé</h2>
           </div>
         </div>
 
-        {/* FORM CONTAINER */}
-        <div className="bg-white rounded-3xl shadow-xl shadow-indigo-900/5 border border-gray-100 overflow-hidden relative min-h-[500px] flex flex-col">
-          
-          <div className="flex-1 relative overflow-hidden p-8 sm:p-12">
-            <AnimatePresence initial={false} custom={direction} mode="wait">
-              <motion.div
-                key={step}
-                custom={direction}
-                variants={slideVariants}
-                initial="enter"
-                animate="center"
-                exit="exit"
-                className="w-full h-full absolute inset-0 p-8 sm:p-12 overflow-y-auto"
+        {/* Progress bar */}
+        <div className="relative h-2 bg-gray-100 rounded-full overflow-hidden">
+          <motion.div className="absolute inset-y-0 left-0 bg-gradient-to-r from-nexus-500 to-nexus-400 rounded-full"
+            initial={{ width: 0 }} animate={{ width: `${progress}%` }} transition={{ duration: 0.6 }} />
+          <ProgressParticles />
+        </div>
+
+        <div className="space-y-1">
+          {STEPS.map((s, i) => {
+            const isActive = step === i;
+            const isDone = step > i;
+            return (
+              <motion.button
+                key={s.id}
+                onClick={() => isDone && setStep(i)}
+                className={`w-full flex items-center gap-4 p-3 rounded-2xl transition-all text-left ${
+                  isActive ? 'bg-nexus-50 border border-nexus-100' :
+                  isDone ? 'opacity-70 hover:opacity-100 cursor-pointer' : 'opacity-40'
+                }`}
+                whileTap={{ scale: 0.98 }}
               >
-                
-                {/* ETAPE 0: IDENTITE */}
-                {step === 0 && (
-                  <div className="max-w-xl mx-auto space-y-8">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-black text-gray-900">Identité Légale</h2>
-                      <p className="text-gray-500 mt-2 font-medium">Commençons par les informations de base de votre entreprise.</p>
-                    </div>
+                <StepIcon step={s} currentStep={step} index={i} />
+                <div className="flex-1 min-w-0">
+                  <p className={`text-sm font-bold ${isActive ? 'text-nexus-700' : isDone ? 'text-gray-700' : 'text-gray-400'}`}>
+                    {s.label}
+                  </p>
+                  <p className="text-[10px] text-gray-400 font-medium truncate">{s.desc}</p>
+                </div>
+                {isDone && <CheckCircle2 size={14} className="text-success-500 flex-shrink-0" />}
+              </motion.button>
+            );
+          })}
+        </div>
+      </div>
 
-                    <div className="space-y-5">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Raison Sociale</label>
-                        <input type="text" value={form.raisonSociale} onChange={e => update('raisonSociale', e.target.value)}
-                          className="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-4 py-3 text-sm font-semibold transition-all outline-none"
-                          placeholder="Ex: Entreprise S.A." />
-                      </div>
+      {/* Right content panel */}
+      <div className="flex-1 flex flex-col p-6 lg:p-10 overflow-y-auto">
+        <div className="max-w-3xl w-full mx-auto flex-1 flex flex-col">
+          {/* Current step header */}
+          <motion.div key={step} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="mb-8">
+            <span className="text-[10px] text-nexus-500 font-black uppercase tracking-widest">ÉTAPE {step + 1}/{STEPS.length}</span>
+            <h2 className="text-2xl font-black text-gray-900 mt-1">{STEPS[step].label}</h2>
+            <p className="text-sm text-gray-500 mt-1">{STEPS[step].desc}</p>
+          </motion.div>
 
-                      <div className="grid grid-cols-2 gap-5">
-                        <div>
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Forme Juridique</label>
-                          <select value={form.formeJuridique} onChange={e => update('formeJuridique', e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-4 py-3 text-sm font-semibold transition-all outline-none appearance-none">
-                            <option value="">Sélectionner</option>
-                            {FORM_LAW.map(l => <option key={l} value={l}>{l}</option>)}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Numéro RCCM</label>
-                          <input type="text" value={form.rccm} onChange={e => update('rccm', e.target.value)}
-                            className="w-full bg-gray-50 border border-gray-200 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 rounded-xl px-4 py-3 text-sm font-semibold transition-all outline-none"
-                            placeholder="RC/..." />
-                        </div>
-                      </div>
-                    </div>
+          {/* Step content */}
+          <div className="flex-1">
+            <SlidePanel isVisible={step === 0}>
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Raison Sociale</label>
+                    <input type="text" value={form.raisonSociale} onChange={e => update('raisonSociale', e.target.value)}
+                      placeholder="Ex: SARL Cameroun Industrie"
+                      className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-nexus-500 focus:border-transparent transition-all" />
                   </div>
-                )}
-
-                {/* ETAPE 1: SECTEURS */}
-                {step === 1 && (
-                  <div className="max-w-2xl mx-auto space-y-8">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-black text-gray-900">Secteurs & Marchés</h2>
-                      <p className="text-gray-500 mt-2 font-medium">Sélectionnez vos domaines d'expertise pour un meilleur ciblage des appels d'offres.</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Secteurs d'Activité</label>
-                        <div className="flex flex-wrap gap-2">
-                          {SECTEURS.map(s => (
-                            <button key={s} onClick={() => toggleArr('secteurs', s)}
-                              className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${
-                                form.secteurs.includes(s) ? 'bg-indigo-50 border-indigo-500 text-indigo-700' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                              }`}>
-                              {s}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-3">Régions d'Intervention</label>
-                        <div className="flex flex-wrap gap-2">
-                          {REGIONS.map(r => (
-                            <button key={r} onClick={() => toggleArr('regions', r)}
-                              className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${
-                                form.regions.includes(r) ? 'bg-emerald-50 border-emerald-500 text-emerald-700' : 'bg-white border-gray-200 text-gray-600 hover:border-gray-300'
-                              }`}>
-                              {r}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Forme Juridique</label>
+                    <div className="flex gap-2">{FORM_LAW.map(f => (
+                      <button key={f} onClick={() => update('formeJuridique', f)}
+                        className={`flex-1 py-3 rounded-xl text-xs font-bold border-2 transition-all ${form.formeJuridique === f ? 'bg-nexus-50 border-nexus-500 text-nexus-700' : 'bg-gray-50 border-gray-200 text-gray-500 hover:border-gray-300'}`}>{f}</button>
+                    ))}</div>
                   </div>
-                )}
-
-                {/* ETAPE 2: CAPACITES */}
-                {step === 2 && (
-                  <div className="max-w-xl mx-auto space-y-8">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-black text-gray-900">Capacités & Taille</h2>
-                      <p className="text-gray-500 mt-2 font-medium">Aidez l'IA à évaluer la taille des marchés que vous pouvez supporter.</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-5 hover:border-indigo-300 transition-colors">
-                        <div className="w-12 h-12 bg-indigo-50 rounded-xl flex items-center justify-center text-indigo-600">
-                          <Users size={24} />
-                        </div>
-                        <div className="flex-1">
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Effectifs (Employés)</label>
-                          <input type="number" value={form.effectifs} onChange={e => update('effectifs', e.target.value)}
-                            className="w-full bg-transparent text-xl font-black text-gray-900 focus:outline-none placeholder:text-gray-300"
-                            placeholder="Ex: 15" />
-                        </div>
-                      </div>
-
-                      <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-center gap-5 hover:border-emerald-300 transition-colors">
-                        <div className="w-12 h-12 bg-emerald-50 rounded-xl flex items-center justify-center text-emerald-600">
-                          <DollarSign size={24} />
-                        </div>
-                        <div className="flex-1">
-                          <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1">Chiffre d'Affaires Moyen (FCFA)</label>
-                          <input type="number" value={form.chiffreAffaires} onChange={e => update('chiffreAffaires', e.target.value)}
-                            className="w-full bg-transparent text-xl font-black text-gray-900 focus:outline-none placeholder:text-gray-300"
-                            placeholder="Ex: 50000000" />
-                        </div>
-                      </div>
-                    </div>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">Numéro RCCM</label>
+                    <input type="text" value={form.rccm} onChange={e => update('rccm', e.target.value)}
+                      placeholder="Ex: RC/DLA/2026/B/1234"
+                      className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-nexus-500 focus:border-transparent transition-all" />
                   </div>
-                )}
-
-                {/* ETAPE 3: DOCUMENTS OCR */}
-                {step === 3 && (
-                  <div className="max-w-2xl mx-auto space-y-8">
-                    <div className="text-center">
-                      <h2 className="text-2xl font-black text-gray-900">Lecture Intelligente (OCR)</h2>
-                      <p className="text-gray-500 mt-2 font-medium">Uploadez vos documents légaux, l'IA extraira les données automatiquement.</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {['rccm', 'niu'].map(doc => (
-                        <div key={doc} className={`border-2 rounded-3xl p-6 text-center transition-all ${docs[doc] ? 'border-emerald-500 bg-emerald-50' : 'border-dashed border-gray-300 hover:border-indigo-400 hover:bg-indigo-50/50'}`}>
-                          {docs[doc] ? (
-                            <div className="flex flex-col items-center">
-                              <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4">
-                                <CheckCircle2 size={32} />
-                              </div>
-                              <h4 className="font-bold text-gray-900 uppercase">{doc} Validé</h4>
-                              <p className="text-xs text-emerald-600 font-medium mt-1">Données extraites avec succès</p>
-                            </div>
-                          ) : ocrLoading === doc ? (
-                            <div className="flex flex-col items-center py-4">
-                              <div className="w-12 h-12 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mb-4" />
-                              <h4 className="font-bold text-gray-900">Analyse IA en cours...</h4>
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center">
-                              <div className="w-16 h-16 bg-white shadow-sm border border-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
-                                <Upload size={24} />
-                              </div>
-                              <h4 className="font-bold text-gray-900 uppercase">Document {doc}</h4>
-                              <p className="text-xs text-gray-500 font-medium mt-2 mb-4">Format PDF ou Image</p>
-                              <button onClick={() => handleOCR(doc)} className="px-5 py-2.5 bg-gray-900 hover:bg-indigo-600 text-white rounded-xl text-xs font-bold transition-colors w-full">
-                                Uploader pour Analyse
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                  <div>
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-1.5">NIU</label>
+                    <input type="text" value={form.niu} onChange={e => update('niu', e.target.value)}
+                      placeholder="Ex: M123456789012X"
+                      className="w-full px-4 py-3.5 bg-gray-50 border border-gray-200 rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-nexus-500 focus:border-transparent transition-all" />
                   </div>
-                )}
-
-                {/* ETAPE 4: RESULTAT IA */}
-                {step === 4 && (
-                  <div className="max-w-xl mx-auto space-y-8 text-center pt-8">
-                    <div className="relative inline-block">
-                      <div className="w-24 h-24 bg-gradient-to-tr from-indigo-600 to-purple-600 rounded-3xl flex items-center justify-center shadow-2xl shadow-indigo-500/30 mx-auto">
-                        <Sparkles size={40} className="text-white" />
-                      </div>
-                      <motion.div 
-                        className="absolute -inset-4 border border-indigo-200 rounded-[2rem]"
-                        animate={{ rotate: 360, scale: [1, 1.05, 1] }}
-                        transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                      />
-                    </div>
-                    
+                </div>
+                <motion.div whileHover={{ scale: 1.01 }} className="p-5 bg-gradient-to-r from-nexus-50 to-indigo-50/50 border border-nexus-100 rounded-2xl flex items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <ScanLine size={24} className="text-nexus-500" />
                     <div>
-                      <h2 className="text-3xl font-black text-gray-900">Profil Validé & Certifié</h2>
-                      <p className="text-gray-500 mt-3 font-medium max-w-md mx-auto">
-                        Félicitations ! L'IA BSTP a analysé vos documents et créé votre Passeport Numérique.
-                      </p>
+                      <h4 className="text-sm font-bold text-nexus-800">OCR Intelligent</h4>
+                      <p className="text-xs text-gray-500">Importez votre RCCM pour préremplir automatiquement</p>
                     </div>
-
-                    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6 flex items-center justify-between text-left">
-                      <div>
-                        <p className="text-xs font-bold text-indigo-500 uppercase tracking-widest mb-1">Score IA Attribué</p>
-                        <p className="text-3xl font-black text-indigo-900">78<span className="text-lg text-indigo-400">/100</span></p>
-                      </div>
-                      <ShieldCheck size={48} className="text-indigo-200" />
-                    </div>
-
-                    <button 
-                      onClick={() => navigate('/dashboard')}
-                      className="w-full py-4 bg-gray-900 hover:bg-indigo-600 text-white rounded-2xl font-bold text-sm transition-colors flex items-center justify-center gap-2"
-                    >
-                      Accéder à mon Espace Croissance <ArrowRight size={18} />
-                    </button>
                   </div>
-                )}
+                  <button onClick={() => handleOCR('rccm')} disabled={!!ocrLoading}
+                    className="px-5 py-2.5 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-black rounded-xl transition-all flex items-center gap-2 shadow-md shadow-nexus-200">
+                    {ocrLoading === 'rccm' ? (
+                      <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                    ) : <><ScanLine size={14} /> Scanner RCCM</>}
+                  </button>
+                </motion.div>
+              </div>
+            </SlidePanel>
 
-              </motion.div>
-            </AnimatePresence>
+            <SlidePanel isVisible={step === 1}>
+              <div className="space-y-6">
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">Secteurs d'activité <span className="text-danger-500">*</span></label>
+                  <div className="flex flex-wrap gap-2">
+                    {SECTEURS.map(s => {
+                      const sel = form.secteurs.includes(s);
+                      return (
+                        <motion.button key={s} whileTap={{ scale: 0.95 }} onClick={() => toggleArr('secteurs', s)}
+                          className={`px-4 py-3 rounded-xl text-sm font-bold border-2 transition-all ${
+                            sel ? 'bg-nexus-50 border-nexus-500 text-nexus-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                          }`}>
+                          {sel && <CheckCircle2 size={14} className="inline mr-1.5" />}{s}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                  {form.secteurs.length > 0 && <p className="text-xs text-success-600 font-bold mt-2 flex items-center gap-1"><CheckCircle2 size={12} /> {form.secteurs.length} secteur(s) sélectionné(s)</p>}
+                </div>
+                <div>
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">Régions de présence <span className="text-danger-500">*</span></label>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                    {REGIONS.map(r => {
+                      const sel = form.regions.includes(r);
+                      return (
+                        <motion.button key={r} whileTap={{ scale: 0.95 }} onClick={() => toggleArr('regions', r)}
+                          className={`px-3 py-3 rounded-xl text-xs font-bold border-2 transition-all ${
+                            sel ? 'bg-nexus-50 border-nexus-500 text-nexus-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:border-gray-300'
+                          }`}>
+                          {sel && <CheckCircle2 size={12} className="inline mr-1" />}{r}
+                        </motion.button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </SlidePanel>
+
+            <SlidePanel isVisible={step === 2}>
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="p-5 bg-gray-50 border border-gray-100 rounded-2xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Users size={18} className="text-nexus-500" />
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Effectifs</span>
+                    </div>
+                    <input type="number" value={form.effectifs} onChange={e => update('effectifs', e.target.value)}
+                      placeholder="Ex: 24"
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-nexus-500" />
+                  </div>
+                  <div className="p-5 bg-gray-50 border border-gray-100 rounded-2xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <DollarSign size={18} className="text-gold-500" />
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">CA annuel</span>
+                    </div>
+                    <div className="relative">
+                      <input type="number" value={form.chiffreAffaires} onChange={e => update('chiffreAffaires', e.target.value)}
+                        placeholder="Ex: 50000000"
+                        className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-nexus-500" />
+                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400">FCFA</span>
+                    </div>
+                  </div>
+                  <div className="p-5 bg-gray-50 border border-gray-100 rounded-2xl">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Briefcase size={18} className="text-success-500" />
+                      <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Marchés réalisés</span>
+                    </div>
+                    <input type="number" value={form.marchesRealises} onChange={e => update('marchesRealises', e.target.value)}
+                      placeholder="Ex: 12"
+                      className="w-full bg-white border border-gray-200 rounded-xl px-4 py-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-nexus-500" />
+                  </div>
+                </div>
+                {form.effectifs > 0 && (
+                  <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="p-4 bg-success-50 border border-success-100 rounded-xl flex items-center gap-3">
+                    <CheckCircle2 size={20} className="text-success-500" />
+                    <div>
+                      <p className="text-sm font-bold text-success-700">Profil technique renseigné</p>
+                      <p className="text-xs text-success-600">Ces données seront vérifiées lors de l'audit terrain.</p>
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </SlidePanel>
+
+            <SlidePanel isVisible={step === 3}>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {[
+                    { key: 'gouvernance', label: 'Gouvernance' },
+                    { key: 'qualite', label: 'Qualité' },
+                    { key: 'conformiteLegale', label: 'Conformité Légale' },
+                    { key: 'capaciteFinanciere', label: 'Capacité Financière' },
+                    { key: 'capaciteTechnique', label: 'Capacité Technique' },
+                    { key: 'rseHqse', label: 'RSE & HQSE' },
+                  ].map(axe => (
+                    <div key={axe.key} className="p-4 bg-gray-50 border border-gray-100 rounded-2xl">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-bold text-gray-700">{axe.label}</span>
+                        <motion.span key={evaluation[axe.key]} initial={{ scale: 1.3 }} animate={{ scale: 1 }} className="text-sm font-black text-nexus-600 bg-white px-2 py-0.5 rounded-lg border border-nexus-100">
+                          {evaluation[axe.key]}/20
+                        </motion.span>
+                      </div>
+                      <input type="range" min="0" max="20" value={evaluation[axe.key]}
+                        onChange={e => setEvaluation(prev => ({ ...prev, [axe.key]: parseInt(e.target.value) }))}
+                        className="w-full accent-nexus-500 h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer" />
+                      <div className="flex justify-between text-[10px] text-gray-400 font-medium mt-1">
+                        <span>Débutant</span>
+                        <span>Expert</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="p-5 bg-gradient-to-r from-nexus-500 to-nexus-600 text-white rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Sparkles size={24} />
+                    <div>
+                      <p className="font-bold">Analyse IA prête</p>
+                      <p className="text-xs text-white/70">Générer le benchmark ONUDI/OHADA</p>
+                    </div>
+                  </div>
+                  <span className="text-2xl font-black">{Math.round(Object.values(evaluation).reduce((a, b) => a + b, 0) / 6 * 5 / 6)}%</span>
+                </motion.div>
+              </div>
+            </SlidePanel>
+
+            <SlidePanel isVisible={step === 4}>
+              <div className="space-y-4">
+                {[
+                  { key: 'rccm', label: 'Registre du Commerce (RCCM)' },
+                  { key: 'niu', label: 'Identifiant Unique (NIU)' },
+                  { key: 'cnps', label: 'Attestation CNPS' },
+                  { key: 'fiscal', label: 'Attestation Fiscale' },
+                ].map(doc => (
+                  <motion.div key={doc.key} whileHover={{ scale: 1.005 }}
+                    className={`p-5 rounded-2xl border-2 transition-all ${
+                      docs[doc.key] ? 'bg-success-50 border-success-200' : 'bg-gray-50 border-gray-100 hover:border-nexus-200'
+                    }`}>
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-3">
+                        {docs[doc.key] ? (
+                          <CheckCircle2 size={22} className="text-success-500" />
+                        ) : (
+                          <div className="w-10 h-10 bg-white border border-gray-200 rounded-xl flex items-center justify-center">
+                            <Upload size={18} className="text-gray-400" />
+                          </div>
+                        )}
+                        <div>
+                          <p className={`text-sm font-bold ${docs[doc.key] ? 'text-success-700' : 'text-gray-900'}`}>{doc.label}</p>
+                          <p className="text-[10px] text-gray-400 font-medium">Format PDF ou PNG</p>
+                        </div>
+                      </div>
+                      {!docs[doc.key] ? (
+                        <button onClick={() => handleOCR(doc.key)} disabled={!!ocrLoading}
+                          className="px-4 py-2.5 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-2">
+                          {ocrLoading === doc.key ? (
+                            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className="w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                          ) : <><ScanLine size={14} /> Scanner</>}
+                        </button>
+                      ) : (
+                        <span className="flex items-center gap-1.5 text-xs font-bold text-success-600">
+                          <CheckCircle2 size={14} /> Validé
+                        </span>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+                <div className="flex items-center gap-3 p-4 bg-nexus-50 border border-nexus-100 rounded-xl">
+                  <ScanLine size={20} className="text-nexus-500" />
+                  <p className="text-xs text-nexus-700 font-medium">L'IA extrait automatiquement les dates de validité de chaque document.</p>
+                </div>
+              </div>
+            </SlidePanel>
+
+            <SlidePanel isVisible={step === 5}>
+              {maturityResults ? (
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-soft">
+                      <h3 className="text-sm font-bold text-gray-900 mb-4">Radar de Maturité</h3>
+                      <RadarChartCard data={[
+                        { axe: 'Juridique', score: evaluation.gouvernance },
+                        { axe: 'Fiscal', score: evaluation.capaciteFinanciere },
+                        { axe: 'CNPS', score: evaluation.conformiteLegale },
+                        { axe: 'Qualité', score: evaluation.qualite },
+                        { axe: 'Technique', score: evaluation.capaciteTechnique },
+                        { axe: 'RSE', score: evaluation.rseHqse },
+                      ]} scoreGlobal={maturityResults.scoreGlobal} />
+                    </div>
+                    <div className="space-y-4">
+                      <div className="p-5 bg-gradient-to-br from-nexus-500 to-nexus-600 text-white rounded-2xl">
+                        <p className="text-xs font-bold uppercase tracking-wider opacity-70">Score Global</p>
+                        <p className="text-5xl font-black mt-1">{maturityResults.scoreGlobal}<span className="text-2xl opacity-70">/100</span></p>
+                        <p className="text-sm text-white/70 mt-2">Éligible au programme d'accompagnement BSTP</p>
+                      </div>
+                      <div className="space-y-3 max-h-64 overflow-y-auto">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Recommandations IA</p>
+                        {maturityResults.ecarts.map((e, i) => (
+                          <motion.div key={i} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.1 }}
+                            className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
+                            <p className="text-[10px] font-black text-nexus-600 uppercase">{e.axe}</p>
+                            <p className="text-xs text-gray-600 mt-1">{e.constat}</p>
+                            <p className="text-xs text-success-600 font-semibold mt-1">✓ {e.recommandation}</p>
+                            {e.referenceNormative && <p className="text-[9px] text-gray-400 font-bold mt-1">Ref: {e.referenceNormative}</p>}
+                          </motion.div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-16">
+                  <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 2, ease: 'linear' }} className="w-16 h-16 border-3 border-nexus-200 border-t-nexus-500 rounded-full mx-auto mb-6" />
+                  <h3 className="text-xl font-bold text-gray-900">Génération de l'analyse...</h3>
+                  <p className="text-sm text-gray-500 mt-2">Comparaison avec les normes ONUDI, OHADA et Loi 2025/010 en cours</p>
+                </div>
+              )}
+            </SlidePanel>
           </div>
 
-          {/* FOOTER ACTIONS */}
-          {step < STEPS.length - 1 && (
-            <div className="border-t border-gray-100 p-6 bg-gray-50/50 flex items-center justify-between">
-              <button 
-                onClick={prevStep}
-                disabled={step === 0}
-                className={`px-6 py-3 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${
-                  step === 0 ? 'opacity-0 pointer-events-none' : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                }`}
-              >
-                <ChevronLeft size={18} /> Retour
-              </button>
-              
-              <button 
-                onClick={nextStep}
-                className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-md shadow-indigo-600/20 transition-all flex items-center gap-2 hover:scale-105 active:scale-95"
-              >
-                {step === STEPS.length - 2 ? "Générer mon Profil IA" : "Étape Suivante"} <ChevronRight size={18} />
-              </button>
-            </div>
-          )}
+          {/* Navigation */}
+          <div className="flex items-center justify-between mt-8 pt-6 border-t border-gray-100">
+            <button onClick={() => setStep(s => Math.max(0, s - 1))} disabled={step === 0 || loading}
+              className="flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold text-gray-500 hover:text-gray-700 hover:bg-gray-50 transition-all disabled:opacity-30">
+              <ChevronLeft size={16} /> Retour
+            </button>
 
+            {step === 3 ? (
+              <motion.button onClick={triggerAI} disabled={loading} whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-nexus-500 to-nexus-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-nexus-200 hover:shadow-xl hover:shadow-nexus-300 transition-all">
+                {loading ? (
+                  <><motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className="w-5 h-5 border-2 border-white border-t-transparent rounded-full" /> Analyse en cours...</>
+                ) : (
+                  <><Sparkles size={16} /> Générer l'Analyse IA</>
+                )}
+              </motion.button>
+            ) : step === 5 && maturityResults ? (
+              <motion.button onClick={handleSubmit} whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-success-500 to-success-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-success-200 hover:shadow-xl transition-all">
+                <Rocket size={16} /> Finaliser mon Profil <ArrowRight size={16} />
+              </motion.button>
+            ) : (
+              <motion.button onClick={() => setStep(s => s + 1)} disabled={!canProceed() || loading} whileTap={{ scale: 0.98 }}
+                className="flex items-center gap-2 px-6 py-3 bg-nexus-500 text-white rounded-xl font-bold text-sm hover:bg-nexus-600 transition-all disabled:opacity-40 shadow-md">
+                Suivant <ChevronRight size={16} />
+              </motion.button>
+            )}
+          </div>
         </div>
       </div>
     </div>
