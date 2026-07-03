@@ -110,7 +110,7 @@ const StarterCommunity = lazy(
 const Placeholder = ({ title }) => (
   <div style={{ padding: '40px', textAlign: 'center' }}>
     <h2 style={{ fontSize: '24px', marginBottom: '16px' }}>{title}</h2>
-    <p style={{ color: '#6b7280' }}>Ce module est en cours de construction (Phase de refactoring BSTP NEXUS 2026).</p>
+    <p style={{ color: '#6b7280' }}>Ce module est en cours de construction.</p>
   </div>
 );
 
