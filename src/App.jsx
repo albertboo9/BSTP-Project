@@ -49,6 +49,7 @@ const DonneurOrdreDashboard = lazy(() => import("./pages/donneur-ordre/DonneurOr
 const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/AnnuaireCertifie"));
 const PublishOpportunityPage = lazy(() => import("./pages/donneur-ordre/PublishOpportunityPage"));
 const SourcingAnalytics = lazy(() => import("./pages/donneur-ordre/SourcingAnalytics"));
+const SuiviChantiers = lazy(() => import("./pages/donneur-ordre/SuiviChantiers"));
 
 // DG Module
 const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
@@ -213,6 +214,7 @@ function App() {
               <Route path="/donneur-ordre/annuaire" element={<AnnuaireCertifie />} />
               <Route path="/donneur-ordre/publier" element={<PublishOpportunityPage />} />
               <Route path="/donneur-ordre/analytics" element={<SourcingAnalytics />} />
+            <Route path="/donneur-ordre/suivi-chantiers" element={<SuiviChantiers />} />
             </Route>
 
             <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
