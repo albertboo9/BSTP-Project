@@ -1,8 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { runMaturityRadar } from '../../services/ai/aiFeatures';
+import { useAIFeature } from '../../hooks/useAIFeature';
 import RadarChartCard from '../../components/ui/RadarChartCard';
+import AIResultModal from '../../components/ui/AIResultModal';
 import {
   Building2, MapPin, BarChart3, Upload, Sparkles, CheckCircle2, ChevronRight, ChevronLeft,
   Shuffle, Target, Users, DollarSign, Briefcase, ScanLine, PartyPopper, Rocket, ArrowRight
@@ -82,6 +84,7 @@ export default function OnboardingPME() {
   const [loading, setLoading] = useState(false);
   const [maturityResults, setMaturityResults] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const { data: aiData, isLoading: aiLoading, isFallback, showResult, closeResult, execute: runAI } = useAIFeature(runMaturityRadar);
 
   // Form state
   const [form, setForm] = useState({
@@ -131,24 +134,20 @@ export default function OnboardingPME() {
   const triggerAI = async () => {
     setLoading(true);
     toast.loading('Analyse de maturité en cours...', { id: 'maturity' });
-    try {
-      const res = await runMaturityRadar({
-        pmeId: 'temp',
-        autoEvaluation: evaluation,
-        documentsDejaFournis: Object.keys(docs).filter(k => docs[k])
-      });
-      if (res.success) {
-        setMaturityResults(res.data);
-        toast.success('Analyse IA terminée !', { id: 'maturity', description: 'Votre radar de maturité a été généré.' });
-        setStep(5);
-      } else {
-        toast.error('Erreur d\'analyse', { id: 'maturity' });
-      }
-    } catch {
-      toast.error('Service IA indisponible', { id: 'maturity' });
-    }
+    const res = await runAI({
+      pmeId: 'temp',
+      autoEvaluation: evaluation,
+      documentsDejaFournis: Object.keys(docs).filter(k => docs[k])
+    });
     setLoading(false);
   };
+
+  // When AI data arrives, set maturity results and advance step
+  if (aiData && !maturityResults) {
+    setMaturityResults(aiData);
+    toast.success('Analyse IA terminée !', { id: 'maturity', description: 'Votre radar de maturité a été généré.' });
+    setStep(5);
+  }
 
   const handleSubmit = () => {
     setSubmitted(true);
