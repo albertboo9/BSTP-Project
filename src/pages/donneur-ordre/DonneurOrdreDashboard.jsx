@@ -187,27 +187,6 @@ export default function DonneurOrdreDashboard() {
           </div>
         </div>
       </div>
-      {/* ─── SMART MATCHMAKING IA ─── */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        <button
-          onClick={() => setShowMatchmaking(prev => !prev)}
-          className={`w-full flex items-center gap-4 p-5 text-left transition-colors hover:bg-gray-50/50 ${showMatchmaking ? 'border-b border-gray-100' : ''}`}
-        >
-          <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center flex-shrink-0">
-            <Zap size={20} className="text-indigo-500" />
-          </div>
-          <div className="flex-1">
-            <h3 className="font-bold text-gray-900 text-sm">Smart Matchmaking IA</h3>
-            <p className="text-xs text-gray-400 mt-0.5">Identifiez les meilleures PME pour vos appels d'offres</p>
-          </div>
-          <ChevronRight size={16} className={`text-gray-400 transition-transform ${showMatchmaking ? 'rotate-90' : ''}`} />
-        </button>
-        {showMatchmaking && (
-          <div className="p-6">
-            <SmartMatchmakingIA />
-          </div>
-        )}
-      </div>
     </div>
   );
 }
