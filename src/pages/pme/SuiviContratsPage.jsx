@@ -2,19 +2,21 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { runLegalAssistant } from '../../services/ai/aiFeatures';
 import { useAIFeature } from '../../hooks/useAIFeature';
-import { FileText, ShieldAlert, CheckCircle, Clock, UploadCloud, FileCheck, ArrowRight, ShieldCheck } from 'lucide-react';
+import { FileText, ShieldAlert, CheckCircle, Clock, UploadCloud, FileCheck, ArrowRight, ShieldCheck, AlertTriangle, Search } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MOCK_CONTRACTS = [
-  { id: "ctr-8842", client: "SCDP Cameroun", titre: "Maintenance des Cuves Douala", status: "en_cours", progress: 65, phase: "Phase de Test" },
-  { id: "ctr-9011", client: "Eneo SA", titre: "Installation Transfo Ouest", status: "planifie", progress: 20, phase: "Conception" }
+  { id: "ctr-8842", client: "SCDP Cameroun", titre: "Maintenance des Cuves Douala", status: "en_cours", progress: 65, phase: "En Cours" },
+  { id: "ctr-9011", client: "Eneo SA", titre: "Installation Transfo Ouest", status: "planifie", progress: 20, phase: "Conception" },
+  { id: "ctr-9123", client: "SOSUCAM", titre: "Audit Sécurité SI", status: "termine", progress: 100, phase: "Terminé" },
 ];
+
+const PHASES = ['Conception', 'En Cours', 'Terminé'];
 
 export default function SuiviContratsPage() {
   const { data: analysis, isLoading, execute: analyzeContract } = useAIFeature(runLegalAssistant);
-  const [draggedContract, setDraggedContract] = useState(null);
   const [contractText, setContractText] = useState('');
-  const [contracts, setContracts] = useState(MOCK_CONTRACTS);
+  const [contracts] = useState(MOCK_CONTRACTS);
 
   const handleTextScan = () => {
     if (!contractText.trim()) {
@@ -33,116 +35,127 @@ export default function SuiviContratsPage() {
   return (
     <div className="space-y-6 pb-16">
       {/* Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
+      <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }}
         className="bg-nexus-900 text-white rounded-2xl p-8 flex flex-col md:flex-row md:items-center justify-between gap-6"
       >
         <div>
           <span className="text-[10px] text-nexus-500 font-bold uppercase tracking-widest">Suivi d'Exécution & Risques</span>
           <h1 className="text-3xl font-black tracking-tight mt-1">Vos Contrats & Analyse Juridique</h1>
-          <p className="text-white/60 text-sm mt-2 max-w-lg">
-            Suivez les chantiers et utilisez l'assistant IA pour scanner les clauses léonines ou asymétriques selon le droit OHADA.
-          </p>
+          <p className="text-white/60 text-sm mt-2 max-w-lg">Suivez vos chantiers et scannez les clauses à risque selon le droit OHADA.</p>
         </div>
         <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center flex-shrink-0">
           <FileCheck size={24} className="text-indigo-300" />
         </div>
       </motion.div>
 
-      {/* Grid: Kanban executory follow-up & Legal scanner */}
+      {/* Stats row */}
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Contrats Actifs</span>
+          <p className="text-3xl font-black text-gray-900 mt-1">{contracts.filter(c => c.status !== 'termine').length}</p>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Terminés</span>
+          <p className="text-3xl font-black text-success-600 mt-1">{contracts.filter(c => c.status === 'termine').length}</p>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Progression Moy.</span>
+          <p className="text-3xl font-black text-gray-900 mt-1">{Math.round(contracts.reduce((a, c) => a + c.progress, 0) / contracts.length)}%</p>
+        </div>
+        <div className="bg-white border border-gray-100 rounded-2xl p-5 shadow-soft">
+          <span className="text-xs font-bold text-gray-500 uppercase tracking-wider">Volume Total</span>
+          <p className="text-3xl font-black text-gray-900 mt-1">135M</p>
+          <span className="text-xs text-gray-400 font-medium">FCFA</span>
+        </div>
+      </div>
+
+      {/* Main grid: Kanban + Legal scanner */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Left 2 Cols: Kanban Follow-up */}
-        <div className="lg:col-span-2 space-y-6">
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <h3 className="text-sm font-bold text-white mb-4">Pipeline Kanban des Chantiers en Cours</h3>
-            
-            <div className="grid grid-cols-3 gap-4">
-              {['Conception', 'En Cours', 'Phase de Test'].map((col) => {
-                const filtered = contracts.filter(c => c.phase === col);
-                return (
-                  <div key={col} className="bg-gray-950 border border-gray-800/80 rounded-xl p-3 min-h-[220px] flex flex-col gap-3">
-                    <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-1">{col}</span>
-                    <div className="flex-1 space-y-2">
-                      {filtered.map(c => (
-                        <div key={c.id} className="p-3 bg-gray-900 border border-gray-800 rounded-lg space-y-2">
-                          <div className="flex justify-between items-start gap-1">
-                            <span className="text-[8px] font-black text-nexus-400 uppercase bg-nexus-500/10 px-1.5 py-0.5 rounded border border-nexus-500/20">{c.id}</span>
-                            <span className="text-[8px] text-gray-400 font-bold">{c.client}</span>
-                          </div>
-                          <p className="text-[11px] font-bold text-white leading-tight">{c.titre}</p>
-                          <div className="w-full bg-gray-800 h-1 rounded-full overflow-hidden">
-                            <div className="bg-nexus-500 h-full rounded-full" style={{ width: `${c.progress}%` }} />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+        {/* Left 2 cols: Kanban */}
+        <div className="lg:col-span-2 space-y-4">
+          <h3 className="text-sm font-bold text-gray-900">Pipeline Kanban des Chantiers</h3>
+          <div className="grid grid-cols-3 gap-4">
+            {PHASES.map(col => {
+              const filtered = contracts.filter(c => c.phase === col);
+              return (
+                <div key={col} className="bg-gray-50 border border-gray-100 rounded-2xl p-4 min-h-[280px] flex flex-col gap-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">{col}</span>
+                    <span className="w-5 h-5 rounded-full bg-gray-200 text-[10px] font-black text-gray-500 flex items-center justify-center">{filtered.length}</span>
                   </div>
-                );
-              })}
-            </div>
+                  <div className="flex-1 space-y-2">
+                    {filtered.length === 0 ? (
+                      <div className="text-center py-8 text-xs text-gray-400 font-medium">Aucun contrat</div>
+                    ) : filtered.map(c => (
+                      <div key={c.id} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-all">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-[9px] font-black text-nexus-600 bg-nexus-50 px-1.5 py-0.5 rounded border border-nexus-100">{c.id}</span>
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${c.status === 'termine' ? 'bg-success-50 text-success-700' : c.status === 'en_cours' ? 'bg-nexus-50 text-nexus-700' : 'bg-warning-50 text-warning-700'}`}>
+                            {c.status === 'termine' ? 'Terminé' : c.status === 'en_cours' ? 'En cours' : 'Planifié'}
+                          </span>
+                        </div>
+                        <p className="text-xs font-bold text-gray-900 leading-snug">{c.titre}</p>
+                        <p className="text-[10px] text-gray-500 font-medium mt-1">{c.client}</p>
+                        <div className="mt-2 flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                            <div className={`h-full rounded-full ${c.progress === 100 ? 'bg-success-500' : 'bg-nexus-500'}`} style={{ width: `${c.progress}%` }} />
+                          </div>
+                          <span className="text-[10px] font-bold text-gray-500">{c.progress}%</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        {/* Right Col: Legal scanner */}
-        <div className="lg:col-span-1 bg-gray-900 border border-gray-800 rounded-2xl p-6 flex flex-col gap-4">
+        {/* Right col: Legal scanner */}
+        <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-soft flex flex-col gap-4">
           <div>
-            <h3 className="text-sm font-bold text-white">Analyseur Juridique OHADA</h3>
-            <p className="text-[10px] text-gray-500 mt-0.5">Vérifiez un projet de contrat avant signature pour détecter les risques.</p>
+            <h3 className="text-sm font-bold text-gray-900">Analyseur Juridique OHADA</h3>
+            <p className="text-xs text-gray-500 mt-0.5">Vérifiez un projet de contrat avant signature.</p>
           </div>
 
-          <textarea
-            rows={4}
-            value={contractText}
-            onChange={(e) => setContractText(e.target.value)}
+          <textarea rows={4} value={contractText} onChange={e => setContractText(e.target.value)}
             placeholder="Copiez-collez les clauses contractuelles ici..."
-            className="w-full bg-gray-950 border border-gray-850 rounded-xl p-3 text-xs focus:outline-none focus:border-nexus-500 text-white placeholder-gray-600"
-          />
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl p-3 text-xs focus:outline-none focus:border-nexus-500 text-gray-900 placeholder-gray-400 resize-none" />
 
           <div className="flex gap-2">
-            <button
-              onClick={handleTextScan}
-              disabled={isLoading}
-              className="flex-1 py-2.5 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-black rounded-xl transition-all"
-            >
+            <button onClick={handleTextScan} disabled={isLoading}
+              className="flex-1 py-2.5 bg-nexus-500 hover:bg-nexus-600 text-white text-xs font-black rounded-xl transition-all">
               {isLoading ? "Vérification..." : "Analyser"}
             </button>
-            <button
-              onClick={handleDemoContract}
-              disabled={isLoading}
-              className="px-3 bg-gray-950 border border-gray-850 hover:bg-gray-850 text-gray-400 text-xs font-bold rounded-xl transition-colors"
-            >
+            <button onClick={handleDemoContract} disabled={isLoading}
+              className="px-3 bg-gray-50 border border-gray-100 hover:bg-gray-100 text-gray-500 text-xs font-bold rounded-xl transition-colors">
               Démo
             </button>
           </div>
 
           {analysis && (
-            <div className="border-t border-gray-850 pt-4 space-y-3">
-              <div className="p-3 bg-danger-500/10 border border-danger-500/20 rounded-xl">
-                <span className="text-[9px] font-black text-danger-400 uppercase tracking-widest block">Synthèse IA</span>
-                <p className="text-[11px] text-gray-300 mt-1 leading-snug">{analysis.syntheseGlobale}</p>
+            <div className="border-t border-gray-100 pt-4 space-y-3">
+              <div className="p-3 bg-danger-50 border border-danger-100 rounded-xl">
+                <span className="text-[9px] font-black text-danger-600 uppercase tracking-widest block">Synthèse IA</span>
+                <p className="text-xs text-gray-700 mt-1 leading-snug">{analysis.syntheseGlobale}</p>
               </div>
-
               <div className="space-y-2 max-h-56 overflow-y-auto">
                 <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Clauses à Risque</p>
                 {analysis.clausesRisque.map((c, idx) => (
-                  <div key={idx} className="p-2.5 bg-gray-950 border border-gray-850 rounded-xl space-y-1">
+                  <div key={idx} className="p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1">
                     <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black text-danger-400 bg-danger-500/10 px-1.5 py-0.5 rounded uppercase">Risque {c.niveauRisque}</span>
+                      <span className="text-[9px] font-black text-danger-600 bg-danger-50 px-1.5 py-0.5 rounded uppercase">Risque {c.niveauRisque}</span>
                       {c.articleReference && <span className="text-[8px] text-gray-500 font-bold">{c.articleReference}</span>}
                     </div>
-                    <p className="text-[10px] text-gray-400 italic">"{c.extraitCourt}"</p>
-                    <p className="text-[10px] text-gray-300">{c.explication}</p>
+                    <p className="text-[10px] text-gray-500 italic">"{c.extraitCourt}"</p>
+                    <p className="text-[10px] text-gray-700">{c.explication}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
-
       </div>
-
     </div>
   );
 }

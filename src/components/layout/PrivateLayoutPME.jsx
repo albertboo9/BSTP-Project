@@ -12,5 +12,5 @@ const pmeMenuItems = [
 ];
 
 export default function PrivateLayoutPME() {
-  return <SharedPrivateLayout menuItems={pmeMenuItems} userRoleLabel="PME" />;
+  return <SharedPrivateLayout menuItems={pmeMenuItems} userRoleLabel="Espace Croissance" />;
 }
