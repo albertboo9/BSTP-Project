@@ -29,17 +29,16 @@ export function useChatbot(profilUtilisateur = 'PME') {
 
     try {
       const result = await sendChatMessage({
-        sessionId: sessionId.current,
-        profilUtilisateur,
+        message: text,
         historique,
-        nouveauMessage: text,
       });
 
       const data = result.success ? result.data : null;
       const assistantMsg = {
         id: `a_${Date.now()}`,
         role: 'assistant',
-        content: data?.reponse || "Je rencontre une difficulté technique. Veuillez réessayer dans un instant.",
+        // La vraie API renvoie `reply`, le mock renvoie `reponse` — on essaie les deux
+        content: data?.reply || data?.reponse || "Je rencontre une difficulté technique. Veuillez réessayer dans un instant.",
         suggestedAction: data?.suggestedAction || null,
         timestamp: new Date(),
         isError: !result.success,

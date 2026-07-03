@@ -1,6 +1,6 @@
 import React from 'react';
 import SharedPrivateLayout from './SharedPrivateLayout';
-import { LayoutDashboard, FileCheck, ShieldCheck, GraduationCap, Briefcase, UserCheck } from "lucide-react";
+import { LayoutDashboard, FileCheck, ShieldCheck, GraduationCap, Briefcase, UserCheck, BookOpen, Map } from "lucide-react";
 
 const pmeMenuItems = [
   { path: "/dashboard", label: "Cockpit PME", icon: LayoutDashboard },
@@ -9,6 +9,8 @@ const pmeMenuItems = [
   { path: "/dashboard/opportunites", label: "Appels d'Offres", icon: Briefcase },
   { path: "/dashboard/suivi-contrat", label: "Mes Contrats", icon: FileCheck },
   { path: "/dashboard/academy", label: "BSTP Academy", icon: GraduationCap },
+  { path: "/dashboard/formations", label: "Catalogue Formations", icon: BookOpen },
+  { path: "/dashboard/parcours", label: "Mes Parcours", icon: Map },
 ];
 
 export default function PrivateLayoutPME() {

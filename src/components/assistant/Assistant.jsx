@@ -2,8 +2,9 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
 import { useChatbot } from "../../hooks/useChatbot";
-import { runAudioTranscription } from "../../services/ai/aiFeatures";
-import { MessageSquare, Send, Mic, MicOff, X, Sparkles, ChevronRight, Loader2, StopCircle } from "lucide-react";
+import { runVoiceChat } from "../../services/ai/aiFeatures";
+import { MessageSquare, Send, Mic, X, Sparkles, ChevronRight, Loader2, StopCircle } from "lucide-react";
+
 
 export default function Assistant() {
   const { user } = useAuth();
@@ -69,25 +70,22 @@ export default function Assistant() {
   const transcribeAudio = async (audioBlob) => {
     setIsTranscribing(true);
     try {
-      const reader = new FileReader();
-      reader.readAsDataURL(audioBlob);
-      reader.onloadend = async () => {
-        const base64Audio = reader.result.split(',')[1];
-        const result = await runAudioTranscription({
-          fichierAudioBase64: base64Audio,
-          mimeType: 'audio/webm',
-          dureeSecondes: Math.round(audioBlob.size / 16000),
-          contexteUsage: 'saisie_chatbot',
-        });
-        if (result.success && result.data?.transcription) {
-          sendMessage(result.data.transcription);
+      // Utilise la vraie route /api/voice via FormData (Whisper)
+      const result = await runVoiceChat(audioBlob);
+      if (result.success && result.data) {
+        // La vraie API renvoie { user_said, ai_response }
+        if (result.data.user_said) {
+          // Envoie le texte transcrit ET la réponse IA si disponible
+          sendMessage(result.data.user_said);
         }
-        setIsTranscribing(false);
-      };
+      }
     } catch {
+      // silently fail
+    } finally {
       setIsTranscribing(false);
     }
   };
+
 
   const quickQuestions = [
     "Comment créer mon entreprise ?",
