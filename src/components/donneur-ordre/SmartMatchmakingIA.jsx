@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { runSmartMatchmaking } from '../../services/ai/aiFeatures';
 import { Zap, Search, Trophy, Star, MapPin, ShieldCheck, Loader2, AlertTriangle, ChevronDown, ChevronUp, Plus, X } from 'lucide-react';
@@ -47,8 +47,8 @@ function ScoreBar({ score }) {
   );
 }
 
-export default function SmartMatchmakingIA() {
-  const [form, setForm] = useState({
+export default function SmartMatchmakingIA({ defaultAoData, titleOverride }) {
+  const [form, setForm] = useState(defaultAoData || {
     titre: '',
     secteur: '',
     region: '',
@@ -115,22 +115,31 @@ export default function SmartMatchmakingIA() {
     }
   }, [form, isLoading]);
 
+  useEffect(() => {
+    if (defaultAoData) {
+      handleMatch();
+    }
+  }, [defaultAoData, handleMatch]);
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between mb-6">
         <div>
           <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
             <Zap size={22} className="text-indigo-500" />
-            Smart Matchmaking B2B
+            {titleOverride || "Smart Matchmaking B2B"}
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            L'IA identifie et classe les meilleures PME locales pour votre appel d'offres
+            {defaultAoData 
+              ? "L'IA analyse instantanément la base pour trouver les meilleurs sous-traitants pour cet appel d'offres."
+              : "L'IA identifie et classe les meilleures PME locales pour votre appel d'offres"}
           </p>
         </div>
       </div>
 
       {/* Formulaire AO */}
+      {!defaultAoData && (
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 space-y-4">
         <h3 className="text-sm font-semibold text-gray-700 flex items-center gap-2">
           <Search size={15} className="text-indigo-400" />
@@ -230,6 +239,7 @@ export default function SmartMatchmakingIA() {
           }
         </button>
       </div>
+      )}
 
       {/* Error */}
       <AnimatePresence>

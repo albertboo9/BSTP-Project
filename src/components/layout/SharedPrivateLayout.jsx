@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useAuthStore } from "../../stores/authStore";
 import Assistant from "../assistant/Assistant";
 import TrustBadge from "../ui/TrustBadge";
+import { useProactiveAI } from "../../hooks/useProactiveAI";
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -39,6 +40,9 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [roleSwitcherOpen, setRoleSwitcherOpen] = useState(false);
+
+  // Initialize Proactive AI Toasts
+  useProactiveAI(user?.role || "pme");
 
   const handleLogout = () => {
     logout();
