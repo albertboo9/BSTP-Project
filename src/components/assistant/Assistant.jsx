@@ -1,26 +1,93 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../context/AuthContext";
+import { useChatbot } from "../../hooks/useChatbot";
+import { runAudioTranscription } from "../../services/ai/aiFeatures";
+import { MessageSquare, Send, Mic, MicOff, X, Sparkles, ChevronRight, Loader2, StopCircle } from "lucide-react";
 
-function Assistant() {
+export default function Assistant() {
   const { user } = useAuth();
+  const { messages, isTyping, sendMessage, clearHistory } = useChatbot(user?.role || 'PME');
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: "bot",
-      text: `Bonjour ${user?.firstName || ""} ! 👋`,
-      time: "Maintenant",
-    },
-    {
-      id: 2,
-      type: "bot",
-      text: "Je suis STARTER, votre assistant pédagogique. Je suis là pour vous guider dans votre parcours entrepreneurial.",
-      time: "Maintenant",
-    },
-  ]);
   const [inputValue, setInputValue] = useState("");
+  const [isRecording, setIsRecording] = useState(false);
+  const [isTranscribing, setIsTranscribing] = useState(false);
   const messagesEndRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages]);
+
+  const handleSend = useCallback((text = inputValue) => {
+    if (!text.trim() || isTyping) return;
+    sendMessage(text);
+    setInputValue("");
+  }, [inputValue, isTyping, sendMessage]);
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+      mediaRecorderRef.current = mediaRecorder;
+      audioChunksRef.current = [];
+
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) audioChunksRef.current.push(event.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        stream.getTracks().forEach(track => track.stop());
+        await transcribeAudio(audioBlob);
+      };
+
+      mediaRecorder.start();
+      setIsRecording(true);
+    } catch (err) {
+      console.error('Microphone access denied:', err);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+      mediaRecorderRef.current.stop();
+    }
+    setIsRecording(false);
+  };
+
+  const transcribeAudio = async (audioBlob) => {
+    setIsTranscribing(true);
+    try {
+      const reader = new FileReader();
+      reader.readAsDataURL(audioBlob);
+      reader.onloadend = async () => {
+        const base64Audio = reader.result.split(',')[1];
+        const result = await runAudioTranscription({
+          fichierAudioBase64: base64Audio,
+          mimeType: 'audio/webm',
+          dureeSecondes: Math.round(audioBlob.size / 16000),
+          contexteUsage: 'saisie_chatbot',
+        });
+        if (result.success && result.data?.transcription) {
+          sendMessage(result.data.transcription);
+        }
+        setIsTranscribing(false);
+      };
+    } catch {
+      setIsTranscribing(false);
+    }
+  };
 
   const quickQuestions = [
     "Comment créer mon entreprise ?",
@@ -29,85 +96,16 @@ function Assistant() {
     "Comment obtenir ma certification ?",
   ];
 
-  useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [messages]);
-
-  const handleSend = (text = inputValue) => {
-    if (!text.trim()) return;
-
-    // User message
-    const userMsg = {
-      id: Date.now(),
-      type: "user",
-      text,
-      time: new Date().toLocaleTimeString("fr-FR", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-    setMessages((prev) => [...prev, userMsg]);
-    setInputValue("");
-
-    // Simulate bot response
-    setTimeout(() => {
-      const botResponses = [
-        "D'après votre profil, je vous recommande de commencer par le parcours 'Création d'entreprise'. Voulez-vous que je vous guide ?",
-        "Le financement de votre projet peut passer par plusieurs canaux : guichet unique, banques partenaires, ou investisseurs privés.",
-        "Les formations sont dispensées sur notre campus e-learning partenaire. Je peux vous diriger vers les modules adaptés à votre parcours.",
-        "La certification MINPEEMSA valide vos compétences après completion des formations et tests. C'est une reconnaissance officielle du ministère.",
-      ];
-      const randomResponse =
-        botResponses[Math.floor(Math.random() * botResponses.length)];
-      const botMsg = {
-        id: Date.now() + 1,
-        type: "bot",
-        text: randomResponse,
-        time: new Date().toLocaleTimeString("fr-FR", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
-      };
-      setMessages((prev) => [...prev, botMsg]);
-    }, 1000);
-  };
-
   return (
     <>
       {/* Floating button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        animate={{ scale: [1, 1.1, 1] }}
-        transition={{ repeat: Infinity, duration: 2 }}
-        style={{
-          position: "fixed",
-          bottom: "24px",
-          right: "24px",
-          width: "60px",
-          height: "60px",
-          borderRadius: "50%",
-          background: "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-          border: "none",
-          boxShadow: "0 4px 20px rgba(99, 91, 255, 0.4)",
-          cursor: "pointer",
-          zIndex: 1000,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        animate={{ scale: [1, 1.08, 1] }}
+        transition={{ repeat: Infinity, duration: 3 }}
+        className="fixed bottom-6 right-6 w-14 h-14 rounded-full bg-gradient-to-br from-nexus-500 to-nexus-700 border-none shadow-lg shadow-nexus-500/30 cursor-pointer z-[1000] flex items-center justify-center"
       >
-        <svg
-          width="28"
-          height="28"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="white"
-          strokeWidth="2"
-        >
-          <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>
+        <MessageSquare size={24} className="text-white" />
       </motion.button>
 
       {/* Chat window */}
@@ -118,214 +116,115 @@ function Assistant() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            style={{
-              position: "fixed",
-              bottom: "100px",
-              right: "24px",
-              width: "380px",
-              height: "500px",
-              background: "white",
-              borderRadius: "20px",
-              boxShadow: "0 10px 40px rgba(0,0,0,0.15)",
-              zIndex: 1000,
-              display: "flex",
-              flexDirection: "column",
-              overflow: "hidden",
-            }}
+            className="fixed bottom-24 right-6 w-[380px] h-[560px] bg-white rounded-2xl shadow-2xl z-[1000] flex flex-col overflow-hidden border border-gray-100"
           >
             {/* Header */}
-            <div
-              style={{
-                padding: "20px",
-                background: "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                color: "white",
-              }}
-            >
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "12px" }}
-              >
-                <div
-                  style={{
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "12px",
-                    background: "rgba(255,255,255,0.2)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg
-                    width="24"
-                    height="24"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  >
-                    <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                  </svg>
+            <div className="bg-gradient-to-br from-nexus-500 to-nexus-700 px-5 py-4 text-white flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                  <Sparkles size={20} />
                 </div>
                 <div>
-                  <h3 style={{ fontSize: "16px", fontWeight: 700, margin: 0 }}>
-                    STARTER
-                  </h3>
-                  <p style={{ fontSize: "12px", opacity: 0.8, margin: 0 }}>
-                    Votre assistant pédagogique
-                  </p>
+                  <h3 className="font-bold text-sm">Assistant BSTP</h3>
+                  <p className="text-[11px] text-white/70">{isTyping ? 'En train d\'écrire...' : 'En ligne'}</p>
                 </div>
               </div>
-              <button
-                onClick={() => setIsOpen(false)}
-                style={{
-                  position: "absolute",
-                  top: "16px",
-                  right: "16px",
-                  background: "transparent",
-                  border: "none",
-                  color: "white",
-                  cursor: "pointer",
-                }}
-              >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={clearHistory} className="p-2 hover:bg-white/10 rounded-xl transition-colors" title="Nouvelle conversation">
+                  <X size={16} />
+                </button>
+                <button onClick={() => setIsOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-colors">
+                  <X size={18} />
+                </button>
+              </div>
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "16px" }}>
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/50">
               {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: msg.type === "user" ? "flex-end" : "flex-start",
-                    marginBottom: "16px",
-                  }}
-                >
-                  <div
-                    style={{
-                      maxWidth: "80%",
-                      padding: "12px 16px",
-                      borderRadius:
-                        msg.type === "user"
-                          ? "16px 16px 4px 16px"
-                          : "16px 16px 16px 4px",
-                      background:
-                        msg.type === "user"
-                          ? "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)"
-                          : "#f8f9fa",
-                      color: msg.type === "user" ? "white" : "#1a1a2e",
-                      fontSize: "14px",
-                      lineHeight: 1.5,
-                    }}
-                  >
-                    {msg.text}
+                <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                  <div className={`max-w-[85%] p-3.5 rounded-2xl text-sm leading-relaxed ${
+                    msg.role === 'user'
+                      ? 'bg-nexus-500 text-white rounded-tr-none'
+                      : msg.isError
+                        ? 'bg-danger-50 border border-danger-100 text-danger-700 rounded-tl-none'
+                        : 'bg-white border border-gray-100 text-gray-800 rounded-tl-none shadow-sm'
+                  }`}>
+                    <p className="whitespace-pre-wrap">{msg.content}</p>
+                    {msg.suggestedAction && (
+                      <button
+                        onClick={() => window.location.href = msg.suggestedAction.route}
+                        className="mt-2 flex items-center gap-1 text-xs font-bold text-nexus-600 bg-nexus-50 px-3 py-1.5 rounded-lg hover:bg-nexus-100 transition-colors"
+                      >
+                        {msg.suggestedAction.label} <ChevronRight size={12} />
+                      </button>
+                    )}
                   </div>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      color: "#9ca3af",
-                      marginTop: "4px",
-                    }}
-                  >
-                    {msg.time}
+                  <span className="text-[10px] text-gray-400 mt-1 px-1">
+                    {msg.timestamp?.toLocaleTimeString?.('fr-FR', { hour: '2-digit', minute: '2-digit' }) || ''}
                   </span>
                 </div>
               ))}
+
+              {isTyping && (
+                <div className="flex items-start">
+                  <div className="bg-white border border-gray-100 rounded-2xl rounded-tl-none p-4 shadow-sm">
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-2 h-2 bg-nexus-400 rounded-full animate-bounce" />
+                      <div className="w-2 h-2 bg-nexus-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                      <div className="w-2 h-2 bg-nexus-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isTranscribing && (
+                <div className="flex items-center justify-center py-2">
+                  <div className="flex items-center gap-2 text-xs text-nexus-500 font-semibold">
+                    <Loader2 size={14} className="animate-spin" />
+                    Transcription vocale en cours...
+                  </div>
+                </div>
+              )}
+
               <div ref={messagesEndRef} />
             </div>
 
             {/* Quick questions */}
-            <div
-              style={{
-                padding: "12px 16px",
-                borderTop: "1px solid #f3f4f6",
-                display: "flex",
-                gap: "8px",
-                overflowX: "auto",
-              }}
-            >
+            <div className="px-4 py-2 border-t border-gray-100 flex gap-2 overflow-x-auto">
               {quickQuestions.map((q, i) => (
-                <button
-                  key={i}
-                  onClick={() => handleSend(q)}
-                  style={{
-                    padding: "8px 12px",
-                    background: "#f8f9fa",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "20px",
-                    fontSize: "12px",
-                    color: "#6b7280",
-                    whiteSpace: "nowrap",
-                    cursor: "pointer",
-                    flexShrink: 0,
-                  }}
-                >
+                <button key={i} onClick={() => { setInputValue(q); handleSend(q); }}
+                  className="whitespace-nowrap px-3 py-1.5 bg-gray-50 border border-gray-100 rounded-full text-[11px] font-medium text-gray-500 hover:bg-nexus-50 hover:text-nexus-600 hover:border-nexus-100 transition-all flex-shrink-0">
                   {q}
                 </button>
               ))}
             </div>
 
             {/* Input */}
-            <div
-              style={{
-                padding: "16px",
-                borderTop: "1px solid #f3f4f6",
-                display: "flex",
-                gap: "12px",
-              }}
-            >
+            <div className="px-4 py-3 border-t border-gray-100 flex items-center gap-2">
+              <button
+                onClick={isRecording ? stopRecording : startRecording}
+                className={`p-2.5 rounded-xl transition-all flex-shrink-0 ${
+                  isRecording ? 'bg-danger-500 text-white animate-pulse' : 'bg-gray-50 text-gray-400 hover:text-gray-600 hover:bg-gray-100'
+                }`}
+                title={isRecording ? 'Arrêter l\'enregistrement' : 'Enregistrer un message vocal'}
+              >
+                {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
+              </button>
               <input
                 type="text"
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSend()}
+                onKeyDown={handleKeyDown}
                 placeholder="Posez votre question..."
-                style={{
-                  flex: 1,
-                  padding: "12px 16px",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "12px",
-                  fontSize: "14px",
-                  outline: "none",
-                }}
+                className="flex-1 px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:border-nexus-300 focus:ring-1 focus:ring-nexus-200 transition-all"
               />
               <button
                 onClick={() => handleSend()}
-                style={{
-                  width: "44px",
-                  height: "44px",
-                  borderRadius: "12px",
-                  background:
-                    "linear-gradient(135deg, #635bff 0%, #7c3aed 100%)",
-                  border: "none",
-                  color: "white",
-                  cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
+                disabled={!inputValue.trim() || isTyping}
+                className="p-2.5 bg-nexus-500 text-white rounded-xl hover:bg-nexus-600 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex-shrink-0"
               >
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
-                </svg>
+                <Send size={18} />
               </button>
             </div>
           </motion.div>
@@ -334,5 +233,3 @@ function Assistant() {
     </>
   );
 }
-
-export default Assistant;

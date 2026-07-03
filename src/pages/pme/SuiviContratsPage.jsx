@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { runLegalAssistant } from '../../services/ai/aiFeatures';
 import { useAIFeature } from '../../hooks/useAIFeature';
-import { FileText, ShieldAlert, CheckCircle, Clock, UploadCloud, FileCheck, ArrowRight, ShieldCheck, AlertTriangle, Search } from 'lucide-react';
+import AIResultModal from '../../components/ui/AIResultModal';
+import { FileText, ShieldAlert, CheckCircle, Clock, UploadCloud, FileCheck, ArrowRight, ShieldCheck, AlertTriangle, Search, Scale, Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 const MOCK_CONTRACTS = [
@@ -14,7 +15,7 @@ const MOCK_CONTRACTS = [
 const PHASES = ['Conception', 'En Cours', 'Terminé'];
 
 export default function SuiviContratsPage() {
-  const { data: analysis, isLoading, execute: analyzeContract } = useAIFeature(runLegalAssistant);
+  const { data: analysis, isLoading, isFallback, showResult, closeResult, execute: analyzeContract } = useAIFeature(runLegalAssistant);
   const [contractText, setContractText] = useState('');
   const [contracts] = useState(MOCK_CONTRACTS);
 
@@ -133,27 +134,58 @@ export default function SuiviContratsPage() {
             </button>
           </div>
 
-          {analysis && (
-            <div className="border-t border-gray-100 pt-4 space-y-3">
-              <div className="p-3 bg-danger-50 border border-danger-100 rounded-xl">
-                <span className="text-[9px] font-black text-danger-600 uppercase tracking-widest block">Synthèse IA</span>
-                <p className="text-xs text-gray-700 mt-1 leading-snug">{analysis.syntheseGlobale}</p>
-              </div>
-              <div className="space-y-2 max-h-56 overflow-y-auto">
-                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Clauses à Risque</p>
-                {analysis.clausesRisque.map((c, idx) => (
-                  <div key={idx} className="p-2.5 bg-gray-50 border border-gray-100 rounded-xl space-y-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[9px] font-black text-danger-600 bg-danger-50 px-1.5 py-0.5 rounded uppercase">Risque {c.niveauRisque}</span>
-                      {c.articleReference && <span className="text-[8px] text-gray-500 font-bold">{c.articleReference}</span>}
-                    </div>
-                    <p className="text-[10px] text-gray-500 italic">"{c.extraitCourt}"</p>
-                    <p className="text-[10px] text-gray-700">{c.explication}</p>
+          {/* AI Result Modal */}
+          <AIResultModal
+            isOpen={showResult}
+            onClose={closeResult}
+            title="Analyse Juridique OHADA"
+            icon={<Scale size={20} className="text-nexus-500" />}
+            isError={!analysis && showResult}
+            isFallback={isFallback}
+            onExport={() => toast.success('Rapport téléchargé', { description: 'Le rapport d\'analyse juridique a été généré.' })}
+          >
+            {analysis && (
+              <div className="space-y-5">
+                {/* Synthèse */}
+                <div className="p-5 bg-gradient-to-br from-nexus-500 to-nexus-600 text-white rounded-2xl">
+                  <p className="text-xs font-bold uppercase tracking-wider opacity-70">Synthèse IA</p>
+                  <p className="text-sm font-medium mt-2 leading-relaxed">{analysis.syntheseGlobale}</p>
+                </div>
+
+                {/* Clauses à risque */}
+                <div>
+                  <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <AlertTriangle size={16} className="text-danger-500" />
+                    Clauses à risque détectées ({analysis.clausesRisque.length})
+                  </h4>
+                  <div className="space-y-3">
+                    {analysis.clausesRisque.map((c, idx) => {
+                      const riskColor = c.niveauRisque === 'eleve' ? 'danger' : c.niveauRisque === 'moyen' ? 'warning' : 'success';
+                      const colorMap = {
+                        danger: { bg: 'bg-danger-50', border: 'border-danger-100', text: 'text-danger-700', badge: 'bg-danger-500' },
+                        warning: { bg: 'bg-warning-50', border: 'border-warning-100', text: 'text-warning-700', badge: 'bg-warning-500' },
+                        success: { bg: 'bg-success-50', border: 'border-success-100', text: 'text-success-700', badge: 'bg-success-500' },
+                      };
+                      const cc = colorMap[riskColor];
+                      return (
+                        <motion.div key={idx} initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: idx * 0.1 }}
+                          className={`p-4 ${cc.bg} border ${cc.border} rounded-xl space-y-2`}>
+                          <div className="flex items-center justify-between">
+                            <span className={`text-[10px] font-black ${cc.text} ${cc.badge} text-white px-2 py-0.5 rounded uppercase`}>
+                              Risque {c.niveauRisque}
+                            </span>
+                            {c.articleReference && <span className="text-[9px] text-gray-500 font-bold">{c.articleReference}</span>}
+                          </div>
+                          <p className="text-xs text-gray-500 italic leading-relaxed">« {c.extraitCourt} »</p>
+                          <p className="text-xs text-gray-700 font-medium">{c.explication}</p>
+                        </motion.div>
+                      );
+                    })}
                   </div>
-                ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
+          </AIResultModal>
         </div>
       </div>
     </div>
