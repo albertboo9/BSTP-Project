@@ -49,6 +49,7 @@ const DonneurOrdreDashboard = lazy(() => import("./pages/donneur-ordre/DonneurOr
 const AnnuaireCertifie = lazy(() => import("./pages/donneur-ordre/annuaire/AnnuaireCertifie"));
 const PublishOpportunityPage = lazy(() => import("./pages/donneur-ordre/PublishOpportunityPage"));
 const SourcingAnalytics = lazy(() => import("./pages/donneur-ordre/SourcingAnalytics"));
+const SuiviChantiers = lazy(() => import("./pages/donneur-ordre/SuiviChantiers"));
 
 // DG Module
 const DashboardDG = lazy(() => import("./pages/dg/DashboardDG"));
@@ -58,6 +59,9 @@ const VigilancePage = lazy(() => import("./pages/dg/VigilancePage"));
 
 // Agent Module
 const DashboardAgent = lazy(() => import("./pages/agent/DashboardAgent"));
+const AuditDocumentaire = lazy(() => import("./pages/agent/AuditDocumentaire"));
+const PlanificationTerrain = lazy(() => import("./pages/agent/PlanificationTerrain"));
+const MediationTripartite = lazy(() => import("./pages/agent/MediationTripartite"));
 
 const ParcoursDetail = lazy(
   () => import("./pages/Dashboard/ParcoursDetail"),
@@ -167,98 +171,68 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <ParcoursProvider>
           <Routes>
-          <Route element={<AuthLayout />}>
-            {/* Auth Routes - Nouveau Design */}
-            <Route path="/login" element={<TestLogin />} />
-            <Route path="/login/partner" element={<LoginPartner />} />
-            <Route path="/signup" element={<SignupChoice />} />
-            <Route
-              path="/signup/entrepreneur"
-              element={<SignupEntrepreneur />}
-            />
-            <Route path="/signup/partner" element={<SignupPartner />} />
-          </Route>
+            <Route element={<AuthLayout />}>
+              <Route path="/login" element={<TestLogin />} />
+              <Route path="/login/partner" element={<LoginPartner />} />
+              <Route path="/signup" element={<SignupChoice />} />
+              <Route path="/signup/entrepreneur" element={<SignupEntrepreneur />} />
+              <Route path="/signup/partner" element={<SignupPartner />} />
+            </Route>
 
-          {/* Public Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Navigate to="/login" replace />} />
-            <Route path="/home-legacy" element={<Home />} />
-            <Route path="/test-login" element={<TestLogin />} />
-            <Route path="/test-orbital" element={<TestOrbitalBubbles />} />
-            <Route path="/test-redesign" element={<TestOrbitalRedesign />} />
-            <Route path="/demo/menus" element={<MenuStylesDemo />} />
-            <Route path="/demo/mega-menu" element={<MegaMenuDemo />} />
-            <Route path="/parcours" element={<Parcours />} />
-            <Route path="/formations" element={<Formations />} />
-            <Route path="/partenaires" element={<Partenaires />} />
+            <Route element={<PublicLayout />}>
+              <Route path="/" element={<Navigate to="/login" replace />} />
+              <Route path="/home-legacy" element={<Home />} />
+              <Route path="/test-login" element={<TestLogin />} />
+              <Route path="/test-orbital" element={<TestOrbitalBubbles />} />
+              <Route path="/test-redesign" element={<TestOrbitalRedesign />} />
+              <Route path="/demo/menus" element={<MenuStylesDemo />} />
+              <Route path="/demo/mega-menu" element={<MegaMenuDemo />} />
+              <Route path="/parcours" element={<Parcours />} />
+              <Route path="/formations" element={<Formations />} />
+              <Route path="/partenaires" element={<Partenaires />} />
+              <Route path="/ressources/outils-bons-plans" element={<ToolsAndTips />} />
+              <Route path="/ressources/informations" element={<InformationCenter />} />
+              <Route path="/ressources/annuaire" element={<ProfessionalDirectory />} />
+              <Route path="/ressources/innovation" element={<InnovationCompetitivite />} />
+              <Route path="/ressources/projets" element={<EntrepreneurProjects />} />
+              <Route path="/ressources/communaute" element={<StarterCommunity />} />
+            </Route>
 
-            {/* Resources Routes */}
-            <Route
-              path="/ressources/outils-bons-plans"
-              element={<ToolsAndTips />}
-            />
-            <Route
-              path="/ressources/informations"
-              element={<InformationCenter />}
-            />
-            <Route
-              path="/ressources/annuaire"
-              element={<ProfessionalDirectory />}
-            />
-            <Route
-              path="/ressources/innovation"
-              element={<InnovationCompetitivite />}
-            />
-            <Route
-              path="/ressources/projets"
-              element={<EntrepreneurProjects />}
-            />
-            <Route
-              path="/ressources/communaute"
-              element={<StarterCommunity />}
-            />
-          </Route>
+            <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
+              <Route path="/dashboard" element={<DashboardPME />} />
+              <Route path="/dashboard/onboarding" element={<OnboardingPME />} />
+              <Route path="/dashboard/passeport" element={<PasseportPME />} />
+              <Route path="/dashboard/opportunites" element={<OpportunitiesPage />} />
+              <Route path="/dashboard/suivi-contrat" element={<SuiviContratsPage />} />
+              <Route path="/dashboard/academy" element={<AcademyPage />} />
+              <Route path="/dashboard/profile" element={<DashboardProfile />} />
+              <Route path="/dashboard/messages" element={<DashboardMessages />} />
+            </Route>
 
-          {/* PME Routes */}
-          <Route element={<ProtectedRoute allowedRoles={["pme"]}><PrivateLayoutPME /></ProtectedRoute>}>
-            <Route path="/dashboard" element={<DashboardPME />} />
-            <Route path="/dashboard/onboarding" element={<OnboardingPME />} />
-            <Route path="/dashboard/passeport" element={<PasseportPME />} />
-            <Route path="/dashboard/opportunites" element={<OpportunitiesPage />} />
-            <Route path="/dashboard/suivi-contrat" element={<SuiviContratsPage />} />
-            <Route path="/dashboard/academy" element={<AcademyPage />} />
-            {/* Legacy PME routes if needed temporarily */}
-            <Route path="/dashboard/profile" element={<DashboardProfile />} />
-            <Route path="/dashboard/messages" element={<DashboardMessages />} />
-          </Route>
+            <Route element={<ProtectedRoute allowedRoles={["donneur_ordre"]}><PrivateLayoutDO /></ProtectedRoute>}>
+              <Route path="/donneur-ordre" element={<DonneurOrdreDashboard />} />
+              <Route path="/donneur-ordre/annuaire" element={<AnnuaireCertifie />} />
+              <Route path="/donneur-ordre/publier" element={<PublishOpportunityPage />} />
+              <Route path="/donneur-ordre/analytics" element={<SourcingAnalytics />} />
+            <Route path="/donneur-ordre/suivi-chantiers" element={<SuiviChantiers />} />
+            </Route>
 
-          {/* Donneur d'Ordre Routes */}
-          <Route element={<ProtectedRoute allowedRoles={["donneur_ordre"]}><PrivateLayoutDO /></ProtectedRoute>}>
-            <Route path="/donneur-ordre" element={<DonneurOrdreDashboard />} />
-            <Route path="/donneur-ordre/annuaire" element={<AnnuaireCertifie />} />
-            <Route path="/donneur-ordre/publier" element={<PublishOpportunityPage />} />
-            <Route path="/donneur-ordre/analytics" element={<SourcingAnalytics />} />
-          </Route>
+            <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
+              <Route path="/agent" element={<DashboardAgent />} />
+              <Route path="/agent/audits" element={<AuditDocumentaire />} />
+              <Route path="/agent/terrain" element={<PlanificationTerrain />} />
+              <Route path="/agent/mediation" element={<MediationTripartite />} />
+            </Route>
 
-          {/* Agent BSTP Routes */}
-          <Route element={<ProtectedRoute allowedRoles={["agent_bstp"]}><PrivateLayoutAgent /></ProtectedRoute>}>
-            <Route path="/agent" element={<DashboardAgent />} />
-            <Route path="/agent/audits" element={<Navigate to="/agent?tab=audit" replace />} />
-            <Route path="/agent/terrain" element={<Navigate to="/agent?tab=terrain" replace />} />
-            <Route path="/agent/mediation" element={<Navigate to="/agent?tab=mediation" replace />} />
-          </Route>
+            <Route element={<ProtectedRoute allowedRoles={["dg"]}><PrivateLayoutDG /></ProtectedRoute>}>
+              <Route path="/observatoire" element={<DashboardDG />} />
+              <Route path="/observatoire/pipeline" element={<PipelinePage />} />
+              <Route path="/observatoire/capital-humain" element={<CapitalHumainPage />} />
+              <Route path="/observatoire/vigilance" element={<VigilancePage />} />
+            </Route>
 
-          {/* Direction Générale Routes */}
-          <Route element={<ProtectedRoute allowedRoles={["dg"]}><PrivateLayoutDG /></ProtectedRoute>}>
-            <Route path="/observatoire" element={<DashboardDG />} />
-            <Route path="/observatoire/pipeline" element={<PipelinePage />} />
-            <Route path="/observatoire/capital-humain" element={<CapitalHumainPage />} />
-            <Route path="/observatoire/vigilance" element={<VigilancePage />} />
-          </Route>
-
-          {/* Catch all */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </ParcoursProvider>
       </Suspense>
     </>
