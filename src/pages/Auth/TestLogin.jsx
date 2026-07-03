@@ -76,7 +76,7 @@ export default function TestLogin() {
   return (
     <>
       <Helmet>
-        <title>Portail de Connexion - BSTP NEXUS 2026</title>
+        <title>Portail de Connexion - BSTP</title>
       </Helmet>
 
       <div className="min-h-screen bg-white flex">
@@ -88,10 +88,8 @@ export default function TestLogin() {
           
           {/* Top Logo */}
           <div className="relative z-10 flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#635bff] to-[#7c3aed] flex items-center justify-center shadow-lg">
-              <Sparkles className="text-white" size={24} />
-            </div>
-            <span className="text-2xl font-black tracking-tight">BSTP NEXUS</span>
+            <img src="/logos/logo-bstp.jpeg" alt="BSTP" className="w-12 h-12 rounded-xl object-cover shadow-lg" />
+            <span className="text-2xl font-black tracking-tight">BSTP</span>
           </div>
 
           {/* Middle Content */}
