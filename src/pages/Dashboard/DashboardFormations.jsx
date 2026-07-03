@@ -264,6 +264,26 @@ function DashboardFormations() {
             </button>
           ))}
         </div>
+
+        <div className="flex gap-2">
+          <a
+            href="http://campus.studieslearning.com/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold transition-all shadow-sm"
+          >
+            Accéder au Campus E-Learning
+          </a>
+          <button
+            onClick={() => {
+              // Triggering a toast or modal in real app
+              alert("Votre demande de formation sur-mesure a été initiée. Un conseiller vous contactera.");
+            }}
+            className="flex items-center gap-2 px-5 py-3 bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 rounded-xl text-sm font-bold transition-all shadow-sm"
+          >
+            Demander une Formation
+          </button>
+        </div>
       </motion.div>
 
       {/* Enrolled Formations */}

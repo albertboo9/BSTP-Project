@@ -205,6 +205,8 @@ function App() {
               <Route path="/dashboard/opportunites" element={<OpportunitiesPage />} />
               <Route path="/dashboard/suivi-contrat" element={<SuiviContratsPage />} />
               <Route path="/dashboard/academy" element={<AcademyPage />} />
+              <Route path="/dashboard/formations" element={<DashboardFormations />} />
+              <Route path="/dashboard/parcours" element={<DashboardParcours />} />
               <Route path="/dashboard/profile" element={<DashboardProfile />} />
               <Route path="/dashboard/messages" element={<DashboardMessages />} />
             </Route>

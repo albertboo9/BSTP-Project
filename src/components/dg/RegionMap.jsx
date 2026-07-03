@@ -1,6 +1,11 @@
+import React from 'react';
+import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
+
 export default function RegionMap({ regions = [] }) {
   const maxPme = Math.max(...regions.map(r => r.pme), 1);
 
+  // Coordonnées approximatives des capitales régionales du Cameroun
   const regionCoords = [
     { name: "Littoral", lat: 4.0511, lng: 9.7679 },
     { name: "Centre", lat: 3.8480, lng: 11.5021 },
@@ -22,59 +27,82 @@ export default function RegionMap({ regions = [] }) {
     return '#c7d2fe';
   };
 
-  const getSize = (pme) => {
+  const getRadius = (pme) => {
     const ratio = pme / maxPme;
-    if (ratio > 0.7) return 16;
-    if (ratio > 0.4) return 12;
-    if (ratio > 0.2) return 9;
-    return 6;
-  };
-
-  // Map region name to abbreviation for display
-  const abb = {
-    "Littoral": "LT", "Centre": "CE", "Ouest": "OU", "Sud-Ouest": "SO",
-    "Nord-Ouest": "NO", "Adamaoua": "AD", "Nord": "ND", "Extrême-Nord": "EN",
-    "Est": "ES", "Sud": "SU"
+    if (ratio > 0.7) return 24;
+    if (ratio > 0.4) return 18;
+    if (ratio > 0.2) return 14;
+    return 10;
   };
 
   return (
-    <div className="rounded-xl border border-gray-100 shadow-soft bg-white p-4">
-      <div className="grid grid-cols-5 gap-2">
+    <div className="rounded-2xl border border-gray-100 shadow-sm bg-white overflow-hidden relative" style={{ height: '400px' }}>
+      <MapContainer 
+        center={[6.5, 12.5]} 
+        zoom={6} 
+        scrollWheelZoom={false}
+        style={{ height: '100%', width: '100%', zIndex: 0 }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          className="map-tiles-grayscale"
+        />
+        
         {regionCoords.map((r) => {
           const regionData = regions.find(d => d.name === r.name);
           const pme = regionData?.pme || 0;
-          const color = getColor(pme);
-          const size = getSize(pme);
+          if (pme === 0) return null;
+
           return (
-            <div
+            <CircleMarker
               key={r.name}
-              className="flex flex-col items-center justify-center gap-1.5 rounded-xl p-3 bg-gray-50 border border-gray-100 hover:border-indigo-200 hover:bg-indigo-50/30 transition-all cursor-default"
-              title={`${r.name} — ${pme} PME`}
+              center={[r.lat, r.lng]}
+              radius={getRadius(pme)}
+              pathOptions={{
+                fillColor: getColor(pme),
+                fillOpacity: 0.7,
+                color: '#fff',
+                weight: 2
+              }}
             >
-              <div
-                className="rounded-full flex items-center justify-center text-white font-bold text-[10px]"
-                style={{
-                  width: `${size * 2}px`,
-                  height: `${size * 2}px`,
-                  backgroundColor: color,
-                  boxShadow: `0 0 0 2px ${color}22`,
-                }}
-              >
-                {abb[r.name]}
-              </div>
-              <span className="text-[9px] font-bold text-gray-500 text-center leading-tight">{r.name}</span>
-              <span className="text-[11px] font-black text-gray-800">{pme}</span>
-            </div>
+              <Tooltip direction="top" offset={[0, -10]} opacity={1} className="custom-leaflet-tooltip">
+                <div className="text-center p-1">
+                  <span className="block font-bold text-gray-900 text-sm">{r.name}</span>
+                  <span className="block text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded mt-1">{pme} PME</span>
+                </div>
+              </Tooltip>
+            </CircleMarker>
           );
         })}
+      </MapContainer>
+      
+      {/* Legend Override */}
+      <div className="absolute bottom-4 left-4 z-[400] bg-white/90 backdrop-blur-md p-3 rounded-xl border border-gray-100 shadow-sm">
+        <h4 className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-2">Densité PME</h4>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#635bff' }} /><span className="text-xs font-semibold text-gray-700">Forte</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#7c7eff' }} /><span className="text-xs font-semibold text-gray-700">Moyenne</span></div>
+          <div className="flex items-center gap-2"><div className="w-3 h-3 rounded-full" style={{ backgroundColor: '#c7d2fe' }} /><span className="text-xs font-semibold text-gray-700">Faible</span></div>
+        </div>
       </div>
-
-      {/* Legend */}
-      <div className="flex items-center justify-center gap-4 mt-4 pt-3 border-t border-gray-50">
-        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#635bff' }} /><span className="text-[10px] font-semibold text-gray-500">Forte</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#a5b4fc' }} /><span className="text-[10px] font-semibold text-gray-500">Moyenne</span></div>
-        <div className="flex items-center gap-1.5"><div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: '#c7d2fe' }} /><span className="text-[10px] font-semibold text-gray-500">Faible</span></div>
-      </div>
+      
+      {/* CSS overrides for grayscale tiles to match theme better */}
+      <style>{`
+        .map-tiles-grayscale {
+          filter: grayscale(100%) opacity(0.8);
+        }
+        .custom-leaflet-tooltip {
+          background-color: white;
+          border: none;
+          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          border-radius: 0.75rem;
+          padding: 0.5rem;
+        }
+        .leaflet-tooltip-top:before {
+          border-top-color: white;
+        }
+      `}</style>
     </div>
   );
 }
