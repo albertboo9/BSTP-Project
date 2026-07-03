@@ -153,11 +153,6 @@ function App() {
 
   return (
     <>
-      <Helmet>
-        <html lang="fr" />
-        <title>STARTERKITCM - Portail de l'Entrepreneuriat Camerounais</title>
-      </Helmet>
-
       {/* ScrollToTop - Réinitialise le scroll au début de chaque page */}
       <ScrollToTop />
 

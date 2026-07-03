@@ -52,23 +52,23 @@ export default function DashboardPME() {
       <motion.div
         initial={{ opacity: 0, y: -16 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-nexus-900 text-white rounded-2xl p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6"
+        className="bg-white border border-gray-100 rounded-2xl p-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-soft"
       >
         <div>
-          <p className="text-white/50 text-sm font-bold uppercase tracking-widest mb-2">Espace Croissance PME</p>
-          <h1 className="text-3xl font-black tracking-tight">
-            Bonjour, {user?.firstName || 'PME'}&nbsp;👋
+          <p className="text-nexus-500 text-sm font-bold uppercase tracking-widest mb-2">Espace Croissance PME</p>
+          <h1 className="text-3xl font-black tracking-tight text-gray-900">
+            Bonjour, {user?.firstName || 'PME'}
           </h1>
-          <p className="text-white/70 mt-2 font-medium text-sm max-w-lg">
+          <p className="text-gray-500 mt-2 font-medium text-sm max-w-lg">
             Votre tableau de bord de pilotage. Complétez votre Passeport pour accéder aux appels d'offres qualifiés.
           </p>
         </div>
         <div className="flex items-center gap-4 flex-shrink-0">
           <TrustBadge level={maturityData.trustLevel} size="lg" />
           <div className="text-right">
-            <span className="text-4xl font-black">{maturityData.scoreGlobal}</span>
-            <span className="text-white/60 text-sm font-bold">/100</span>
-            <p className="text-white/50 text-xs font-bold uppercase tracking-wider mt-1">Score de maturité</p>
+            <span className="text-4xl font-black text-gray-900">{maturityData.scoreGlobal}</span>
+            <span className="text-gray-400 text-sm font-bold">/100</span>
+            <p className="text-gray-400 text-xs font-bold uppercase tracking-wider mt-1">Score de maturité</p>
           </div>
         </div>
       </motion.div>

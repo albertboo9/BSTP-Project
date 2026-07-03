@@ -3,9 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { usePasseportStore } from '../../../stores/passeportStore';
 import { X, UploadCloud, ScanLine, CheckCircle2 } from 'lucide-react';
 
-export default function DocumentUploadModal({ isOpen, onClose, docId, docName }) {
-  const { uploadDocument, isUploading, uploadProgress } = usePasseportStore();
-  const [step, setStep] = useState('select'); // select, uploading, scanning, success
+export default function DocumentUploadModal({ isOpen, onClose, onConfirm, docName, isUploading: externalUploading }) {
+  const { isUploading, uploadProgress } = usePasseportStore();
+  const [step, setStep] = useState('select');
+  const uploading = externalUploading || isUploading;
 
   useEffect(() => {
     if (isOpen) {
@@ -13,13 +14,27 @@ export default function DocumentUploadModal({ isOpen, onClose, docId, docName })
     }
   }, [isOpen]);
 
+  useEffect(() => {
+    if (uploading) {
+      setStep('uploading');
+    }
+  }, [uploading]);
+
+  useEffect(() => {
+    if (uploadProgress === 100 && step === 'uploading') {
+      setStep('scanning');
+      const t = setTimeout(() => {
+        setStep('success');
+        setTimeout(() => onClose(), 1500);
+      }, 800);
+      return () => clearTimeout(t);
+    }
+  }, [uploadProgress, step, onClose]);
+
   const handleUpload = async () => {
-    setStep('uploading');
-    await uploadDocument(docId);
-    setStep('success');
-    setTimeout(() => {
-      onClose();
-    }, 1500);
+    if (onConfirm) {
+      onConfirm();
+    }
   };
 
   useEffect(() => {

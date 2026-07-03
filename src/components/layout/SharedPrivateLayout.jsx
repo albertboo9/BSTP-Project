@@ -19,14 +19,15 @@ import {
   X,
   User,
   RefreshCw,
-  FolderLock
+  ChevronDown,
+  Sparkles
 } from "lucide-react";
 
 const ROLES = [
-  { id: "pme", label: "Cockpit PME", color: "from-blue-500 to-indigo-600", path: "/dashboard" },
-  { id: "donneur_ordre", label: "Donneur d'Ordre", color: "from-purple-500 to-pink-600", path: "/donneur-ordre" },
-  { id: "agent_bstp", label: "Agent BSTP", color: "from-amber-500 to-orange-600", path: "/agent" },
-  { id: "dg", label: "Direction Générale", color: "from-emerald-500 to-teal-600", path: "/observatoire" }
+  { id: "pme", label: "Cockpit PME", color: "text-nexus-500", bg: "bg-nexus-50", path: "/dashboard" },
+  { id: "donneur_ordre", label: "Donneur d'Ordre", color: "text-purple-600", bg: "bg-purple-50", path: "/donneur-ordre" },
+  { id: "agent_bstp", label: "Agent BSTP", color: "text-amber-600", bg: "bg-amber-50", path: "/agent" },
+  { id: "dg", label: "Direction Générale", color: "text-emerald-600", bg: "bg-emerald-50", path: "/observatoire" }
 ];
 
 export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "Utilisateur" }) {
@@ -51,29 +52,22 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-900 text-gray-100 font-sans overflow-x-hidden">
-      {/* Dynamic Grid Background for Futuristic Vibe */}
-      <div className="fixed inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-25 pointer-events-none z-0" />
-
-      {/* Desktop Sidebar */}
+    <div className="flex min-h-screen bg-surface-50 text-gray-900 font-sans">
+      {/* Desktop Sidebar — White Premium */}
       <aside
-        className={`fixed top-0 left-0 bottom-0 z-40 bg-gray-950 border-r border-gray-800 transition-all duration-300 flex flex-col ${
+        className={`fixed top-0 left-0 bottom-0 z-40 bg-white border-r border-gray-200/80 transition-all duration-300 flex flex-col ${
           sidebarOpen ? "w-64" : "w-20"
         } hidden md:flex`}
       >
         {/* Sidebar Header */}
-        <div className="h-20 flex items-center justify-between px-6 border-b border-gray-800/80">
+        <div className="h-20 flex items-center justify-between px-6 border-b border-gray-100">
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-lg shadow-white/5">
-              <img
-                src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
-                alt="BSTPKIT"
-                className="w-8 h-8 object-contain"
-              />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center flex-shrink-0 shadow-sm">
+              <Sparkles className="text-white" size={18} />
             </div>
             {sidebarOpen && (
               <div className="flex flex-col">
-                <span className="font-black text-sm tracking-tight text-white uppercase">BSTPKIT CM</span>
+                <span className="font-black text-sm tracking-tight text-gray-900 uppercase">BSTPKIT CM</span>
                 <span className="text-[10px] text-nexus-500 font-bold uppercase tracking-widest">Nexus 2026</span>
               </div>
             )}
@@ -81,7 +75,7 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
         </div>
 
         {/* Sidebar Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-1.5 overflow-y-auto">
+        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
           {menuItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
@@ -89,18 +83,18 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3.5 px-4 py-3 rounded-xl transition-all duration-200 group relative ${
+                className={`flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group relative ${
                   isActive
-                    ? "bg-nexus-500 text-white font-semibold shadow-lg shadow-nexus-500/10"
-                    : "text-gray-400 hover:text-white hover:bg-gray-900"
+                    ? "bg-nexus-50 text-nexus-700 font-semibold"
+                    : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                 }`}
               >
-                <Icon size={20} className={`${isActive ? "text-white" : "text-gray-400 group-hover:text-nexus-400"}`} />
-                {sidebarOpen && <span className="text-sm truncate">{item.label}</span>}
+                <Icon size={18} className={`${isActive ? "text-nexus-500" : "text-gray-400 group-hover:text-gray-600"}`} />
+                {sidebarOpen && <span className="text-sm font-medium truncate">{item.label}</span>}
                 {isActive && (
                   <motion.div
                     layoutId="activeIndicator"
-                    className="absolute left-0 top-2 bottom-2 w-1.5 bg-white rounded-r"
+                    className="absolute left-0 top-1.5 bottom-1.5 w-1 bg-nexus-500 rounded-r"
                     transition={{ type: "spring", stiffness: 380, damping: 30 }}
                   />
                 )}
@@ -110,46 +104,44 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
         </nav>
 
         {/* Role Switcher & User Panel */}
-        <div className="p-4 border-t border-gray-800 bg-gray-950/80 backdrop-blur">
-          {/* Active Switcher Option */}
+        <div className="p-3 border-t border-gray-100 bg-white">
           <div className="relative">
             <button
               onClick={() => setRoleSwitcherOpen(!roleSwitcherOpen)}
-              className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-900 hover:bg-gray-800 border border-gray-800 transition-all text-left"
+              className="w-full flex items-center justify-between p-3 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-100 transition-all text-left"
             >
               <div className="flex items-center gap-3 min-w-0">
-                <div className="w-8 h-8 rounded-lg bg-nexus-500/10 text-nexus-400 flex items-center justify-center flex-shrink-0">
-                  <RefreshCw size={16} />
+                <div className="w-8 h-8 rounded-lg bg-nexus-50 text-nexus-500 flex items-center justify-center flex-shrink-0">
+                  <RefreshCw size={14} />
                 </div>
                 {sidebarOpen && (
                   <div className="min-w-0">
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Acteur Actuel</p>
-                    <p className="text-xs font-bold text-white truncate">{userRoleLabel}</p>
+                    <p className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Acteur Actuel</p>
+                    <p className="text-xs font-bold text-gray-900 truncate">{userRoleLabel}</p>
                   </div>
                 )}
               </div>
-              {sidebarOpen && <ChevronRight size={14} className={`text-gray-500 transition-transform ${roleSwitcherOpen ? "rotate-90" : ""}`} />}
+              {sidebarOpen && <ChevronDown size={14} className={`text-gray-400 transition-transform ${roleSwitcherOpen ? "rotate-180" : ""}`} />}
             </button>
 
-            {/* Dropdown Role Switcher */}
             <AnimatePresence>
               {roleSwitcherOpen && sidebarOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
-                  className="absolute bottom-full left-0 right-0 mb-2 bg-gray-950 border border-gray-800 rounded-xl shadow-2xl overflow-hidden z-50 p-1.5 space-y-1"
+                  className="absolute bottom-full left-0 right-0 mb-2 bg-white border border-gray-200 rounded-xl shadow-elevated overflow-hidden z-50 p-1.5 space-y-1"
                 >
-                  <p className="text-[9px] text-gray-500 font-bold uppercase px-3 py-1 tracking-widest">Changer d'acteur (Démo)</p>
+                  <p className="text-[9px] text-gray-400 font-bold uppercase px-3 py-1 tracking-widest">Changer d'acteur (Démo)</p>
                   {ROLES.map((role) => (
                     <button
                       key={role.id}
                       onClick={() => handleRoleSwitch(role.id, role.path)}
-                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-left text-xs font-semibold transition-colors ${
-                        user?.role === role.id ? "bg-nexus-500/10 text-nexus-400" : "text-gray-400 hover:text-white hover:bg-gray-900"
+                      className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-left text-xs font-semibold transition-colors ${
+                        user?.role === role.id ? `${role.bg} ${role.color}` : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                     >
-                      <div className={`w-2 h-2 rounded-full bg-gradient-to-tr ${role.color}`} />
+                      <div className={`w-2 h-2 rounded-full ${role.color.replace('text-', 'bg-')}`} />
                       <span>{role.label}</span>
                     </button>
                   ))}
@@ -159,20 +151,20 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
           </div>
 
           {/* User info & Logout */}
-          <div className="mt-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-gray-900 border border-gray-800 flex items-center justify-center font-bold text-sm text-nexus-400">
+          <div className="mt-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-lg bg-nexus-50 border border-nexus-100 flex items-center justify-center font-bold text-sm text-nexus-600">
               {user?.firstName?.[0] || "U"}
             </div>
             {sidebarOpen && (
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-bold text-white truncate">{user?.firstName || "Utilisateur"}</p>
-                <p className="text-[10px] text-gray-500 truncate">Connecté</p>
+                <p className="text-xs font-bold text-gray-900 truncate">{user?.firstName || "Utilisateur"}</p>
+                <p className="text-[10px] text-gray-400 truncate">Connecté</p>
               </div>
             )}
             {sidebarOpen && (
               <button
                 onClick={handleLogout}
-                className="p-2 text-gray-500 hover:text-danger-400 transition-colors"
+                className="p-2 text-gray-400 hover:text-danger-500 transition-colors"
                 title="Déconnexion"
               >
                 <LogOut size={16} />
@@ -184,30 +176,36 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
 
       {/* Main Content Wrapper */}
       <div
-        className={`flex-1 min-w-0 flex flex-col transition-all duration-300 z-10 relative ${
+        className={`flex-1 min-w-0 flex flex-col transition-all duration-300 ${
           sidebarOpen ? "md:ml-64" : "md:ml-20"
         }`}
       >
-        {/* Topbar / Header */}
-        <header className="h-20 bg-gray-950/80 backdrop-blur-md border-b border-gray-800 sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8">
+        {/* Topbar / Header — White Premium */}
+        <header className="h-20 bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-30 flex items-center justify-between px-6 lg:px-8">
           <div className="flex items-center gap-4">
+            {/* Desktop sidebar toggle */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="hidden md:flex p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              title={sidebarOpen ? "Réduire la sidebar" : "Agrandir la sidebar"}
+            >
+              <Menu size={20} />
+            </button>
             {/* Mobile menu toggle */}
             <button
               onClick={() => setMobileMenuOpen(true)}
-              className="p-2 text-gray-400 hover:text-white md:hidden"
+              className="p-2 text-gray-400 hover:text-gray-600 md:hidden"
             >
               <Menu size={24} />
             </button>
-
-            {/* Path description / Section Title */}
             <div>
-              <h1 className="text-lg font-black text-white uppercase tracking-tight">
+              <h1 className="text-lg font-bold text-gray-900">
                 {menuItems.find((item) => item.path === location.pathname)?.label || "Espace Sécurisé"}
               </h1>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             {/* TrustBadge if PME */}
             {user?.role === "pme" && (
               <div className="hidden sm:block">
@@ -215,21 +213,21 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
               </div>
             )}
 
-            {/* Cmd+K Search Simulation */}
-            <div className="hidden lg:flex items-center gap-2.5 px-3 py-1.5 rounded-xl bg-gray-900 border border-gray-800/80 text-gray-500 text-xs w-48 hover:border-gray-700 transition-colors cursor-pointer">
+            {/* Cmd+K Search */}
+            <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-400 text-xs w-44 hover:border-gray-300 transition-colors cursor-pointer">
               <Search size={14} />
-              <span className="font-semibold flex-1">Rechercher...</span>
-              <kbd className="bg-gray-800 px-1.5 py-0.5 rounded text-[10px] border border-gray-700">⌘K</kbd>
+              <span className="font-medium flex-1">Rechercher...</span>
+              <kbd className="bg-white px-1.5 py-0.5 rounded text-[10px] border border-gray-200 text-gray-400">⌘K</kbd>
             </div>
 
             {/* Notifications */}
             <div className="relative">
               <button
                 onClick={() => setNotificationsOpen(!notificationsOpen)}
-                className="p-2.5 rounded-xl bg-gray-900 border border-gray-800/80 text-gray-400 hover:text-white relative transition-colors"
+                className="p-2.5 rounded-lg bg-gray-50 border border-gray-200 text-gray-500 hover:text-gray-700 relative transition-colors"
               >
                 <Bell size={18} />
-                <span className="absolute top-1.5 right-1.5 w-2.5 h-2.5 bg-nexus-500 rounded-full border-2 border-gray-950" />
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-nexus-500 rounded-full border-2 border-white" />
               </button>
 
               <AnimatePresence>
@@ -240,26 +238,26 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 15 }}
-                      className="absolute right-0 mt-3 w-80 bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                      className="absolute right-0 mt-3 w-80 bg-white border border-gray-200 rounded-2xl shadow-elevated z-50 overflow-hidden"
                     >
-                      <div className="px-4 py-3.5 border-b border-gray-800 flex items-center justify-between">
-                        <span className="text-xs font-bold text-white uppercase tracking-wider">Notifications</span>
-                        <span className="text-[10px] text-nexus-500 font-bold bg-nexus-500/10 px-2 py-0.5 rounded">3 Nouvelles</span>
+                      <div className="px-4 py-3.5 border-b border-gray-100 flex items-center justify-between">
+                        <span className="text-xs font-bold text-gray-900 uppercase tracking-wider">Notifications</span>
+                        <span className="text-[10px] text-nexus-500 font-bold bg-nexus-50 px-2 py-0.5 rounded">3 Nouvelles</span>
                       </div>
-                      <div className="divide-y divide-gray-800/60 max-h-80 overflow-y-auto">
-                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
-                          <p className="text-xs font-bold text-white leading-tight">Nouvelle recommandation IA</p>
-                          <p className="text-[10px] text-gray-400 mt-1">Analyse du radar de maturité disponible.</p>
+                      <div className="divide-y divide-gray-50 max-h-80 overflow-y-auto">
+                        <div className="p-3.5 hover:bg-gray-50 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-gray-900 leading-tight">Nouvelle recommandation IA</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Analyse du radar de maturité disponible.</p>
                           <p className="text-[9px] text-nexus-500 mt-1 font-bold">Il y a 10m</p>
                         </div>
-                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
-                          <p className="text-xs font-bold text-white leading-tight">Nouveau marché détecté</p>
-                          <p className="text-[10px] text-gray-400 mt-1">Un appel d'offres correspond à votre profil.</p>
+                        <div className="p-3.5 hover:bg-gray-50 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-gray-900 leading-tight">Nouveau marché détecté</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Un appel d'offres correspond à votre profil.</p>
                           <p className="text-[9px] text-nexus-500 mt-1 font-bold">Il y a 2h</p>
                         </div>
-                        <div className="p-3.5 hover:bg-gray-900 transition-colors cursor-pointer">
-                          <p className="text-xs font-bold text-white leading-tight">Formation débloquée</p>
-                          <p className="text-[10px] text-gray-400 mt-1">Accédez à votre nouveau module de formation.</p>
+                        <div className="p-3.5 hover:bg-gray-50 transition-colors cursor-pointer">
+                          <p className="text-xs font-bold text-gray-900 leading-tight">Formation débloquée</p>
+                          <p className="text-[10px] text-gray-500 mt-1">Accédez à votre nouveau module de formation.</p>
                           <p className="text-[9px] text-nexus-500 mt-1 font-bold">Hier</p>
                         </div>
                       </div>
@@ -272,7 +270,7 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
         </header>
 
         {/* Content Viewport */}
-        <main className="flex-1 p-6 lg:p-8 z-10 relative">
+        <main className="flex-1 p-6 lg:p-8">
           <Outlet />
         </main>
       </div>
@@ -283,35 +281,30 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
           <>
             <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.6 }}
+              animate={{ opacity: 0.5 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-50 bg-black/80"
+              className="fixed inset-0 z-50 bg-black/40"
             />
             <motion.aside
               initial={{ x: "-100%" }}
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed top-0 bottom-0 left-0 w-72 bg-gray-950 border-r border-gray-800 z-50 flex flex-col p-6"
+              className="fixed top-0 bottom-0 left-0 w-72 bg-white border-r border-gray-200 z-50 flex flex-col p-6"
             >
               <div className="flex items-center justify-between mb-8">
                 <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center shadow-lg shadow-white/5">
-                    <img
-                      src="https://www.minpmeesa.cm/site/inhoud/uploads/2018/11/logo-1.png"
-                      alt="BSTPKIT"
-                      className="w-6 h-6 object-contain"
-                    />
+                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-nexus-500 to-nexus-700 flex items-center justify-center">
+                    <Sparkles className="text-white" size={16} />
                   </div>
-                  <span className="font-black text-sm text-white uppercase tracking-tight">BSTPKIT CM</span>
+                  <span className="font-black text-sm text-gray-900 uppercase tracking-tight">BSTPKIT CM</span>
                 </div>
-                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-400 hover:text-white">
+                <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-400 hover:text-gray-600">
                   <X size={20} />
                 </button>
               </div>
 
-              {/* Mobile menu nav */}
               <nav className="flex-1 space-y-1">
                 {menuItems.map((item) => {
                   const isActive = location.pathname === item.path;
@@ -323,20 +316,19 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
                       onClick={() => setMobileMenuOpen(false)}
                       className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
                         isActive
-                          ? "bg-nexus-500 text-white font-semibold"
-                          : "text-gray-400 hover:text-white hover:bg-gray-900"
+                          ? "bg-nexus-50 text-nexus-700 font-semibold"
+                          : "text-gray-500 hover:text-gray-900 hover:bg-gray-50"
                       }`}
                     >
                       <Icon size={18} />
-                      <span className="text-sm">{item.label}</span>
+                      <span className="text-sm font-medium">{item.label}</span>
                     </Link>
                   );
                 })}
               </nav>
 
-              {/* Mobile switcher */}
-              <div className="mt-auto border-t border-gray-850 pt-4 space-y-3">
-                <p className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Changer d'acteur (Démo)</p>
+              <div className="mt-auto border-t border-gray-100 pt-4 space-y-3">
+                <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Changer d'acteur (Démo)</p>
                 <div className="grid grid-cols-2 gap-2">
                   {ROLES.map((role) => (
                     <button
@@ -347,8 +339,8 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
                       }}
                       className={`px-3 py-2 rounded-lg text-left text-[11px] font-bold border transition-colors ${
                         user?.role === role.id
-                          ? "bg-nexus-500/10 border-nexus-500/30 text-nexus-400"
-                          : "bg-gray-900 border-gray-800 text-gray-400 hover:text-white"
+                          ? `${role.bg} border-nexus-200 ${role.color}`
+                          : "bg-white border-gray-200 text-gray-500 hover:text-gray-900"
                       }`}
                     >
                       {role.label}
@@ -356,14 +348,14 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
                   ))}
                 </div>
                 <div className="flex items-center gap-3 pt-2">
-                  <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center font-bold text-xs text-nexus-400">
+                  <div className="w-8 h-8 rounded-lg bg-nexus-50 flex items-center justify-center font-bold text-xs text-nexus-600">
                     {user?.firstName?.[0] || "U"}
                   </div>
                   <div className="flex-1">
-                    <p className="text-xs font-bold text-white leading-tight">{user?.firstName}</p>
-                    <p className="text-[10px] text-gray-500">Connecté</p>
+                    <p className="text-xs font-bold text-gray-900 leading-tight">{user?.firstName}</p>
+                    <p className="text-[10px] text-gray-400">Connecté</p>
                   </div>
-                  <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-white">
+                  <button onClick={handleLogout} className="p-2 text-gray-400 hover:text-danger-500">
                     <LogOut size={16} />
                   </button>
                 </div>
@@ -373,7 +365,6 @@ export default function SharedPrivateLayout({ menuItems = [], userRoleLabel = "U
         )}
       </AnimatePresence>
 
-      {/* Floating chatbot assistant */}
       <Assistant />
     </div>
   );

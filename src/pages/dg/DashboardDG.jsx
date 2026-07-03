@@ -8,14 +8,25 @@ import RegionMap from '../../components/dg/RegionMap';
 import FlagIndicator from '../../components/ui/FlagIndicator';
 import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { Building2, TrendingUp, DollarSign, Target, Download, RefreshCw } from 'lucide-react';
+import { Building2, TrendingUp, DollarSign, Target, Download, RefreshCw, BarChart3 } from 'lucide-react';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
   visible: (i) => ({ opacity: 1, y: 0, transition: { delay: i * 0.07, duration: 0.4 } }),
 };
 
-function SectionCard({ title, subtitle, children, className = '', delay = 0 }) {
+function SectionCard({ title, subtitle, children, className = '', delay = 0, animated = true }) {
+  if (!animated) {
+    return (
+      <div className={`bg-white rounded-2xl border border-gray-100 shadow-sm p-6 flex flex-col gap-4 ${className}`}>
+        <div>
+          <h3 className="text-base font-bold text-gray-900">{title}</h3>
+          {subtitle && <p className="text-xs font-semibold text-gray-400 mt-0.5">{subtitle}</p>}
+        </div>
+        {children}
+      </div>
+    );
+  }
   return (
     <motion.div
       custom={delay}
@@ -53,23 +64,23 @@ export default function DashboardDG() {
       {/* ─── HEADER ─── */}
       <motion.div
         initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-nexus-900 text-white p-8 rounded-2xl"
+        className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 bg-white border border-gray-100 p-8 rounded-2xl shadow-soft"
       >
         <div>
-          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur px-3 py-1 rounded-full mb-3">
-            <div className="w-2 h-2 rounded-full bg-success-500 animate-pulse" />
-            <span className="text-xs font-bold tracking-widest uppercase text-white/80">Cockpit Stratégique National</span>
+          <div className="inline-flex items-center gap-2 bg-nexus-50 px-3 py-1 rounded-full mb-3">
+            <div className="w-2 h-2 rounded-full bg-nexus-500 animate-pulse" />
+            <span className="text-xs font-bold tracking-widest uppercase text-nexus-700">Cockpit Stratégique National</span>
           </div>
-          <h1 className="text-3xl font-black tracking-tight">Direction Générale — Observatoire</h1>
-          <p className="text-white/60 mt-2 text-sm font-medium max-w-xl">
+          <h1 className="text-3xl font-black tracking-tight text-gray-900">Direction Générale — Observatoire</h1>
+          <p className="text-gray-500 mt-2 text-sm font-medium max-w-xl">
             Vue consolidée de l'écosystème de sous-traitance BSTP. Données agrégées en temps réel.
           </p>
         </div>
         <div className="flex gap-3">
-          <button onClick={() => toast.info('Synchronisation des données...')} className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-4 py-3 rounded-xl font-semibold text-sm transition-all">
+          <button onClick={() => toast.info('Synchronisation des données...')} className="flex items-center gap-2 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 px-4 py-3 rounded-xl font-semibold text-sm transition-all">
             <RefreshCw size={16} /> Synchroniser
           </button>
-          <button onClick={handleExport} className="flex items-center gap-2 bg-white text-nexus-900 px-5 py-3 rounded-xl font-bold text-sm hover:bg-nexus-50 transition-all shadow-lg">
+          <button onClick={handleExport} className="flex items-center gap-2 bg-nexus-500 text-white px-5 py-3 rounded-xl font-bold text-sm hover:bg-nexus-600 transition-all shadow-soft">
             <Download size={16} /> Exporter le rapport
           </button>
         </div>
@@ -165,6 +176,7 @@ export default function DashboardDG() {
             title="Analyse Territoriale"
             subtitle="Impact économique par région (nombre de PME)"
             delay={8}
+            animated={false}
           >
             <RegionMap regions={regions} />
           </SectionCard>
