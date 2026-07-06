@@ -130,7 +130,7 @@ export default function AcademyPage() {
                         className="px-3 py-2 bg-gray-50 border border-gray-100 rounded-xl text-gray-500 hover:text-gray-700 text-[11px] font-bold transition-all hover:bg-gray-100">
                         Demande PEC
                       </button>
-                      <a href="http://campus.studieslearning.com/" target="_blank" rel="noopener noreferrer"
+                      <a href="https://campus.studieslearning.com/course/view.php?id=104" target="_blank" rel="noopener noreferrer"
                         className="px-3 py-2 bg-nexus-500 hover:bg-nexus-600 text-white rounded-xl text-[11px] font-black flex items-center gap-1 transition-all">
                         Étudier <ExternalLink size={12} />
                       </a>
